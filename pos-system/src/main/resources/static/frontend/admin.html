@@ -1,0 +1,88 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Admin - POS</title>
+  <link rel="stylesheet" href="/frontend/styles.css">
+</head>
+<body>
+  <div class="container">
+    <h1>Admin</h1>
+    <section id="add">
+      <h2>Add Product</h2>
+      <label>ID (optional): <input id="prodId"></label><br>
+      <label>Name: <input id="prodName"></label><br>
+      <label>Price: <input id="prodPrice" type="number" step="0.01"></label><br>
+      <label>Stock: <input id="prodStock" type="number"></label><br>
+      <button id="addProductBtn">Add Product</button>
+      <div id="addResult"></div>
+    </section>
+
+    <section id="inventory">
+      <h2>Inventory</h2>
+      <button id="refreshInventory">Refresh</button>
+      <ul id="inventoryList"></ul>
+    </section>
+
+    <p><a href="/frontend/index.html">Back</a></p>
+  </div>
+
+  <script src="/frontend/app.js"></script>
+  <script>
+    const prodIdEl = document.getElementById('prodId');
+    const nameEl = document.getElementById('prodName');
+    const priceEl = document.getElementById('prodPrice');
+    const stockEl = document.getElementById('prodStock');
+    const addBtn = document.getElementById('addProductBtn');
+    const addResult = document.getElementById('addResult');
+    const refreshBtn = document.getElementById('refreshInventory');
+    const invList = document.getElementById('inventoryList');
+
+    addBtn.onclick = async () => {
+      const body = {
+        id: prodIdEl.value.trim() || null,
+        name: nameEl.value.trim(),
+        price: parseFloat(priceEl.value) || 0,
+        stock: parseInt(stockEl.value) || 0
+      };
+      try {
+        const resp = await apiPost('/api/admin/products', body);
+        if (!resp.ok) { addResult.textContent = 'Error: ' + await resp.text(); return; }
+        const json = await resp.json();
+        addResult.textContent = 'Saved: ' + json.id;
+        refreshInventory();
+      } catch (e) {
+        addResult.textContent = 'Error: ' + e;
+      }
+    };
+
+    async function refreshInventory() {
+      invList.innerHTML = '';
+      try {
+        const resp = await fetch('/api/admin/inventory');
+        if (!resp.ok) { invList.textContent = 'Failed to fetch'; return; }
+        const arr = await resp.json();
+        arr.forEach(p => {
+          const li = document.createElement('li');
+          li.textContent = `${p.name} (${p.id}) - ${fmt(p.price)} stock:${p.stock}`;
+          const qrBtn = document.createElement('button');
+          qrBtn.textContent = 'Generate QR';
+          qrBtn.onclick = async () => {
+            const r = await apiPost(`/api/admin/products/${encodeURIComponent(p.id)}/qr`, null);
+            if (!r.ok) { alert('QR error: ' + await r.text()); return; }
+            const path = await r.text();
+            alert('QR path: ' + path);
+          };
+          li.appendChild(qrBtn);
+          invList.appendChild(li);
+        });
+      } catch (e) {
+        invList.textContent = 'Error: ' + e;
+      }
+    }
+
+    refreshBtn.onclick = refreshInventory;
+    refreshInventory();
+  </script>
+</body>
+</html>

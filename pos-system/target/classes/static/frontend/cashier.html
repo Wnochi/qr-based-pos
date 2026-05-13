@@ -1,0 +1,201 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Cashier - POS</title>
+  <link rel="stylesheet" href="/frontend/styles.css">
+</head>
+<body>
+  <div class="container">
+    <h1>Cashier</h1>
+    <section id="scan">
+      <input id="qrInput" placeholder="Enter QR / Product ID">
+      <button id="scanBtn">Scan</button>
+      <button id="startCamBtn" type="button">Start Camera</button>
+      <button id="stopCamBtn" type="button" disabled>Stop Camera</button>
+      <div id="cameraContainer" style="margin-top:8px;">
+        <video id="video" width="320" height="240" style="display:none;" playsinline autoplay></video>
+        <canvas id="videoCanvas" width="320" height="240" style="display:none;"></canvas>
+      </div>
+      <div id="scanResult"></div>
+    </section>
+
+    <section id="cart">
+      <h2>Cart</h2>
+      <ul id="cartItems"></ul>
+      <div id="cartTotal">Total: 0.00</div>
+      <div>
+        <label>Payment method:
+          <select id="paymentMethod">
+            <option value="CASH">CASH</option>
+            <option value="CARD">CARD</option>
+          </select>
+        </label>
+        <label>Paid amount:
+          <input id="paidAmount" type="number" step="0.01" value="0">
+        </label>
+        <button id="completeBtn">Complete Transaction</button>
+      </div>
+      <pre id="receipt" style="white-space:pre-wrap;"></pre>
+    </section>
+
+    <p><a href="/frontend/index.html">Back</a></p>
+  </div>
+
+  <script src="/frontend/app.js"></script>
+  <script>
+    const qrInput = document.getElementById('qrInput');
+    const scanBtn = document.getElementById('scanBtn');
+    const scanResult = document.getElementById('scanResult');
+    const startCamBtn = document.getElementById('startCamBtn');
+    const stopCamBtn = document.getElementById('stopCamBtn');
+    const videoEl = document.getElementById('video');
+    const videoCanvas = document.getElementById('videoCanvas');
+    const canvasCtx = videoCanvas.getContext && videoCanvas.getContext('2d');
+    const cartItemsEl = document.getElementById('cartItems');
+    const cartTotalEl = document.getElementById('cartTotal');
+    const completeBtn = document.getElementById('completeBtn');
+    const paymentMethodEl = document.getElementById('paymentMethod');
+    const paidAmountEl = document.getElementById('paidAmount');
+    const receiptEl = document.getElementById('receipt');
+
+    let cart = [];
+
+    function renderCart() {
+      cartItemsEl.innerHTML = '';
+      let total = 0;
+      cart.forEach((it, idx) => {
+        const li = document.createElement('li');
+        li.textContent = `${it.name} x${it.quantity}  @ ${fmt(it.unitPrice)}  = ${fmt(it.unitPrice*it.quantity)}`;
+        const rem = document.createElement('button');
+        rem.textContent = 'Remove';
+        rem.onclick = () => { cart.splice(idx,1); renderCart(); };
+        li.appendChild(rem);
+        cartItemsEl.appendChild(li);
+        total += it.unitPrice * it.quantity;
+      });
+      cartTotalEl.textContent = 'Total: ' + fmt(total);
+    }
+
+    scanBtn.onclick = async () => {
+      const qr = qrInput.value.trim();
+      if (!qr) { alert('Enter QR/product id'); return; }
+      scanResult.textContent = 'Looking up...';
+      try {
+        const resp = await apiPost('/api/cashier/transaction/scan', {qr});
+        if (!resp.ok) { scanResult.textContent = 'Not found or error'; return; }
+        const prod = await resp.json();
+        const unitPrice = parseFloat(prod.price || prod.price?.toString?.() || 0);
+        scanResult.textContent = `Found: ${prod.name} - ${fmt(unitPrice)} (stock ${prod.stock})`;
+        const addBtn = document.createElement('button');
+        addBtn.textContent = 'Add to cart';
+        addBtn.onclick = () => {
+          const q = parseInt(prompt('Quantity', '1') || '1', 10);
+          if (q <=0) return;
+          cart.push({productId: prod.id, name: prod.name, unitPrice, quantity: q});
+          renderCart();
+        };
+        scanResult.appendChild(document.createElement('br'));
+        scanResult.appendChild(addBtn);
+      } catch (e) {
+        scanResult.textContent = 'Error: ' + e;
+      }
+    };
+
+    // Camera / QR scanning support using BarcodeDetector (if available)
+    let videoStream = null;
+    let barcodeDetector = null;
+    let scanning = false;
+
+    startCamBtn.onclick = startCamera;
+    stopCamBtn.onclick = stopCamera;
+
+    async function startCamera() {
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        alert('Camera not supported in this browser');
+        return;
+      }
+      try {
+        videoStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
+        videoEl.srcObject = videoStream;
+        videoEl.style.display = 'block';
+        startCamBtn.disabled = true;
+        stopCamBtn.disabled = false;
+        scanResult.textContent = 'Camera started';
+        scanning = true;
+        requestAnimationFrame(detectLoop);
+      } catch (e) {
+        scanResult.textContent = 'Camera error: ' + (e && e.message ? e.message : e);
+      }
+    }
+
+    function stopCamera() {
+      if (videoStream) {
+        videoStream.getTracks().forEach(t => t.stop());
+        videoStream = null;
+      }
+      try { videoEl.srcObject = null; } catch (e) {}
+      videoEl.style.display = 'none';
+      startCamBtn.disabled = false;
+      stopCamBtn.disabled = true;
+      scanning = false;
+      scanResult.textContent = 'Camera stopped';
+    }
+
+    async function detectLoop() {
+      if (!scanning) return;
+      try {
+        if ('BarcodeDetector' in window) {
+          if (!barcodeDetector) {
+            try { barcodeDetector = new BarcodeDetector({ formats: ['qr_code'] }); } catch (e) { barcodeDetector = null; }
+          }
+          if (barcodeDetector) {
+            const barcodes = await barcodeDetector.detect(videoEl);
+            if (barcodes && barcodes.length > 0) {
+              onDetected(barcodes[0].rawValue);
+              return;
+            }
+          }
+        } else {
+          // Fallback: if jsQR is present, draw to canvas and try decoding
+          if (videoEl.readyState === videoEl.HAVE_ENOUGH_DATA && canvasCtx && window.jsQR) {
+            canvasCtx.drawImage(videoEl, 0, 0, videoCanvas.width, videoCanvas.height);
+            const imageData = canvasCtx.getImageData(0, 0, videoCanvas.width, videoCanvas.height);
+            const code = jsQR(imageData.data, imageData.width, imageData.height);
+            if (code) { onDetected(code.data); return; }
+          }
+        }
+      } catch (e) {
+        console.warn('detectLoop error', e);
+      }
+      requestAnimationFrame(detectLoop);
+    }
+
+    function onDetected(code) {
+      scanResult.textContent = 'Detected: ' + code;
+      qrInput.value = code;
+      stopCamera();
+      setTimeout(() => scanBtn.click(), 250);
+    }
+
+    window.addEventListener('beforeunload', () => { try { stopCamera(); } catch (e) {} });
+
+    completeBtn.onclick = async () => {
+      if (cart.length === 0) { alert('Cart is empty'); return; }
+      const items = cart.map(i => ({productId: i.productId, quantity: i.quantity}));
+      const paymentMethod = paymentMethodEl.value;
+      const paidAmount = parseFloat(paidAmountEl.value);
+      try {
+        const resp = await apiPost('/api/cashier/transaction/complete', {items, paymentMethod, paidAmount});
+        if (!resp.ok) { const text = await resp.text(); alert('Error: ' + text); return; }
+        const json = await resp.json();
+        receiptEl.textContent = json.receipt || JSON.stringify(json, null, 2);
+        cart = [];
+        renderCart();
+      } catch (e) {
+        alert('Error: ' + e);
+      }
+    };
+  </script>
+</body>
+</html>
