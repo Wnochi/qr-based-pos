@@ -1,0 +1,348 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Admin Sales Report Dashboard</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    :root {
+      --primary: #2563eb;
+      --primary-dark: #1d4ed8;
+      --bg-main: #f8fafc;
+      --card-bg: #ffffff;
+      --text: #1e293b;
+      --text-muted: #64748b;
+      --border: #e2e8f0;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', system-ui, sans-serif; }
+    body { background-color: var(--bg-main); color: var(--text); min-height: 100vh; display: flex; flex-direction: column; }
+    
+    /* Admin Shell Common Navigation Layout Header */
+    .admin-navbar {
+      display: flex;
+      align-items: center;
+      background-color: var(--card-bg);
+      padding: 1rem 2rem;
+      border-bottom: 2px solid var(--border);
+      gap: 3rem;
+    }
+    .nav-brand-logo { font-size: 1.4rem; font-weight: 800; letter-spacing: 0.05em; color: #0f172a; }
+    .nav-links { display: flex; gap: 1.5rem; list-style: none; }
+    .nav-links a { text-decoration: none; color: var(--text-muted); font-weight: 600; padding: 0.5rem 0.75rem; border-radius: 0.375rem; transition: all 0.15s; }
+    .nav-links a:hover, .nav-links a.active { color: var(--primary); background: #eff6ff; }
+
+    .dashboard-container { padding: 2rem; max-width: 1600px; width: 100%; margin: 0 auto; display: flex; flex-direction: column; gap: 1.5rem; }
+    
+    /* Filters Ribbon Dashboard Selection Bar Matrix */
+    .filter-ctrl-bar {
+      display: flex;
+      align-items: center;
+      justify-content: flex-start;
+      gap: 1.5rem;
+      background: var(--card-bg);
+      padding: 1.25rem;
+      border-radius: 0.5rem;
+      border: 1px solid var(--border);
+    }
+    .filter-group { display: flex; flex-direction: column; gap: 0.35rem; }
+    .filter-group label { font-size: 0.85rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; }
+    .filter-group select { padding: 0.5rem 2rem 0.5rem 0.75rem; border: 1px solid var(--border); border-radius: 0.375rem; background: #fff; font-size: 0.95rem; font-weight: 600; cursor: pointer; }
+    
+    .btn { padding: 0.6rem 1.2rem; border: none; border-radius: 0.375rem; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 0.5rem; font-size: 0.95rem; transition: background 0.15s; }
+    .btn-primary { background-color: var(--primary); color: white; }
+    .btn-primary:hover { background-color: var(--primary-dark); }
+
+    /* Summary Indicators KPI Metric Cards Grid Ribbon */
+    .kpi-row-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1.5rem; }
+    .kpi-card { background: var(--card-bg); padding: 1.5rem; border-radius: 0.5rem; border: 1px solid var(--border); display: flex; flex-direction: column; gap: 0.25rem; }
+    .kpi-card .kpi-title { font-size: 0.9rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase; }
+    .kpi-card .kpi-value { font-size: 1.75rem; font-weight: 800; color: #0f172a; }
+
+    /* Main Dual Grid Core Panels Layout View */
+    .report-main-grid { display: grid; grid-template-columns: 1.1fr 0.9fr; gap: 1.5rem; min-height: 520px; }
+    .report-card-panel { background: var(--card-bg); border-radius: 0.5rem; border: 1px solid var(--border); padding: 1.5rem; display: flex; flex-direction: column; gap: 1rem; }
+    .panel-header-title { font-size: 1.15rem; font-weight: 700; color: #0f172a; text-transform: uppercase; border-bottom: 2px solid var(--border); padding-bottom: 0.5rem; }
+    
+    /* Semantic Dynamic Data Reporting Tables Framework styles */
+    .admin-table-frame { width: 100%; border-collapse: collapse; text-align: left; }
+    .admin-table-frame th { background-color: #f8fafc; padding: 0.75rem 1rem; font-weight: 600; font-size: 0.85rem; color: var(--text-muted); text-transform: uppercase; border-bottom: 2px solid var(--border); }
+    .admin-table-frame td { padding: 0.85rem 1rem; border-bottom: 1px solid var(--border); font-size: 0.95rem; vertical-align: middle; }
+    .admin-table-frame tr:hover { background-color: #f8fafc; }
+    
+    .chart-box-wrapper { position: relative; width: 100%; height: 100%; min-height: 360px; display: flex; align-items: center; justify-content: center; }
+  </style>
+</head>
+<body>
+
+  <nav class="admin-navbar">
+    <div class="nav-brand-logo">🏪 STORE ADMIN</div>
+    <ul class="nav-links">
+      <li><a href="#dashboard">Dashboard</a></li>
+      <li><a href="#inventory">Inventory</a></li>
+      <li><a href="#reports" class="active">Sales Report</a></li>
+    </ul>
+  </nav>
+
+  <div class="dashboard-container">
+    
+    <div class="filter-ctrl-bar">
+      <div class="filter-group">
+        <label for="filterMonth">Reporting Month Scope</label>
+        <select id="filterMonth">
+          <option value="ALL">All Months (Yearly Report View)</option>
+          <option value="1">January</option>
+          <option value="2">February</option>
+          <option value="3">March</option>
+          <option value="4">April</option>
+          <option value="5" selected>May</option>
+          <option value="6">June</option>
+          <option value="7">July</option>
+          <option value="8">August</option>
+          <option value="9">September</option>
+          <option value="10">October</option>
+          <option value="11">November</option>
+          <option value="12">December</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <label for="filterYear">Reporting Year</label>
+        <select id="filterYear">
+          <option value="2026" selected>2026</option>
+          <option value="2025">2025</option>
+        </select>
+      </div>
+      <div class="filter-group" style="padding-top: 1.2rem;">
+        <button class="btn btn-primary" onclick="triggerReportRequestFetchData()">📊 Generate Report Request</button>
+      </div>
+    </div>
+
+    <div class="kpi-row-grid">
+      <div class="kpi-card">
+        <span class="kpi-title">Gross Sales Revenue</span>
+        <span class="kpi-value" id="kpiRevenue">₱0.00</span>
+      </div>
+      <div class="kpi-card">
+        <span class="kpi-title">Total Product Quantities Sold</span>
+        <span class="kpi-value" id="kpiCount">0</span>
+      </div>
+      <div class="kpi-card" id="kpiTopProductCard" style="display: none;">
+        <span class="kpi-title">Top Performing Product</span>
+        <span class="kpi-value" id="kpiTopProductName" style="font-size: 1.35rem; padding-top: 0.35rem; color: var(--primary);">N/A</span>
+      </div>
+    </div>
+
+    <div class="report-main-grid">
+      
+      <div class="report-card-panel">
+        <h3 class="panel-header-title" id="leftPanelTitle">Data Logs</h3>
+        <div style="overflow-x: auto; flex: 1; max-height: 480px; overflow-y: auto;">
+          <table class="admin-table-frame">
+            <thead id="reportTableHeader">
+              </thead>
+            <tbody id="reportTableBody">
+              </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="report-card-panel">
+        <h3 class="panel-header-title" id="rightPanelTitle">Projections Breakdown</h3>
+        <div class="chart-box-wrapper" id="rightPanelContentContainer">
+          </div>
+      </div>
+
+    </div>
+
+  </div>
+
+  <script>
+    // Points directly to the endpoints we just loaded inside AdminController.java
+    const API_BASE = "http://localhost:8080/api/admin/reports"; 
+    let projectionChartInstance = null;
+
+    // PIPELINE DELEGATION ROUTER
+    async function triggerReportRequestFetchData() {
+      const selectedMonth = document.getElementById('filterMonth').value;
+      const selectedYear = document.getElementById('filterYear').value;
+      
+      if (selectedMonth === 'ALL') {
+        await fetchAndRenderYearlyReport(selectedYear);
+      } else {
+        await fetchAndRenderMonthlyReport(selectedYear, selectedMonth);
+      }
+    }
+
+    // RESOLUTION LOOP: YEARLY DISPATCH PIPELINE RENDERING
+    async function fetchAndRenderYearlyReport(year) {
+      try {
+        const response = await fetch(`${API_BASE}/yearly?year=${year}`);
+        if (!response.ok) throw new Error("Failed to pull aggregate yearly matrices from server core");
+        const data = await response.json(); // Parses the array list of YearlyReportResponse items
+
+        // Structural UI Transformations
+        document.getElementById('leftPanelTitle').textContent = `Top Monthly Metrics (${year})`;
+        document.getElementById('rightPanelTitle').textContent = "Monthly Performance Matrix Projection";
+        document.getElementById('kpiTopProductCard').style.display = "none";
+
+        let aggregatedRevenue = 0;
+        let aggregatedItemsSold = 0;
+        
+        const labels = [];
+        const continuousRevenueSet = [];
+        const continuousUnitsSet = [];
+
+        // Build HTML lines loop tracking metrics entries
+        let leftRowsHtml = "";
+
+        data.forEach(item => {
+          labels.push(item.month);
+          continuousRevenueSet.push(item.revenue);
+          continuousUnitsSet.push(item.itemsSold);
+          
+          aggregatedRevenue += item.revenue;
+          aggregatedItemsSold += item.itemsSold;
+
+          if (item.revenue > 0 || item.itemsSold > 0) {
+            leftRowsHtml += `
+              <tr>
+                <td><strong>${item.month}</strong></td>
+                <td>₱${item.revenue.toLocaleString('en-US', {minimumFractionDigits: 2})}</td>
+                <td><span style="background: #f1f5f9; padding: 0.25rem 0.5rem; border-radius: 0.25rem; font-weight: 600;">${item.itemsSold.toLocaleString()} units</span></td>
+              </tr>
+            `;
+          }
+        });
+
+        // Set Metric display text
+        document.getElementById('kpiRevenue').textContent = "₱" + aggregatedRevenue.toLocaleString('en-US', {minimumFractionDigits: 2});
+        document.getElementById('kpiCount').textContent = aggregatedItemsSold.toLocaleString();
+
+        document.getElementById('reportTableHeader').innerHTML = `<tr><th>Calendar Month</th><th>Total Revenue Realized</th><th>Quantities Sold</th></tr>`;
+        document.getElementById('reportTableBody').innerHTML = leftRowsHtml || `<tr><td colspan="3" style="text-align:center; color:#94a3b8;">No active transactions on record for ${year}</td></tr>`;
+
+        // Reset and clear active pointer references to avoid leaks inside canvas viewports
+        const rightContent = document.getElementById('rightPanelContentContainer');
+        rightContent.innerHTML = `<canvas id="yearlyChartViewport"></canvas>`;
+        if(projectionChartInstance) { projectionChartInstance.destroy(); projectionChartInstance = null; }
+        
+        // Spawn Chart Engine Canvas Instance
+        renderChartJsEngineCanvasElement(labels, continuousRevenueSet, continuousUnitsSet);
+
+      } catch (err) {
+        console.error(err);
+        alert("Error executing reporting mapping operation: " + err.message);
+      }
+    }
+
+    // RESOLUTION LOOP: MONTHLY DISPATCH PIPELINE RENDERING
+    async function fetchAndRenderMonthlyReport(year, month) {
+      try {
+        const response = await fetch(`${API_BASE}/monthly?year=${year}&month=${month}`);
+        if (!response.ok) throw new Error("Failed to pull active daily transactional lines logs from core");
+        const data = await response.json(); // Parses the array list of MonthlyReportResponse records
+
+        document.getElementById('leftPanelTitle').textContent = "Transaction Item Breakdown Journal";
+        document.getElementById('rightPanelTitle').textContent = "Daily Aggregates Breakdown";
+        document.getElementById('kpiTopProductCard').style.display = "flex";
+
+        if(projectionChartInstance) { projectionChartInstance.destroy(); projectionChartInstance = null; }
+
+        let aggregatedRevenue = 0;
+        let aggregatedItemsSold = 0;
+        const productPopularityMetricsMap = {};
+        const dailyDistributionAggregationMap = {};
+
+        let leftRowsHtml = "";
+
+        if(data.length === 0) {
+          leftRowsHtml = `<tr><td colspan="5" style="text-align:center; color:#94a3b8; padding: 2rem;">No transaction lines logged inside database scopes for selected target period.</td></tr>`;
+          document.getElementById('kpiTopProductName').textContent = "None";
+        } else {
+          leftRowsHtml = data.map(item => {
+            aggregatedRevenue += item.amount;
+            aggregatedItemsSold += item.quantity;
+
+            // Track volume thresholds across items
+            productPopularityMetricsMap[item.productName] = (productPopularityMetricsMap[item.productName] || 0) + item.quantity;
+
+            // Track grouping parameters across day markers
+            const dateStringKey = item.date; 
+            if(!dailyDistributionAggregationMap[dateStringKey]) dailyDistributionAggregationMap[dateStringKey] = { sold: 0, revenue: 0 };
+            dailyDistributionAggregationMap[dateStringKey].sold += item.quantity;
+            dailyDistributionAggregationMap[dateStringKey].revenue += item.amount;
+
+            return `
+              <tr>
+                <td>${item.date}</td>
+                <td style="font-family:monospace; font-weight:600; color: #475569;">${item.transactionNo}</td>
+                <td><strong>${item.productName}</strong></td>
+                <td>${item.quantity}</td>
+                <td style="font-weight: 600;">₱${item.amount.toLocaleString('en-US', {minimumFractionDigits:2})}</td>
+              </tr>
+            `;
+          }).join('');
+
+          // Compute highest value item metrics key reference from localized calculations map
+          const calculatedTopProductKeyName = Object.keys(productPopularityMetricsMap).reduce((a, b) => productPopularityMetricsMap[a] > productPopularityMetricsMap[b] ? a : b);
+          document.getElementById('kpiTopProductName').textContent = calculatedTopProductKeyName;
+        }
+
+        // Apply global variables transformation string values onto indicators counters ribbon
+        document.getElementById('kpiRevenue').textContent = "₱" + aggregatedRevenue.toLocaleString('en-US', {minimumFractionDigits: 2});
+        document.getElementById('kpiCount').textContent = aggregatedItemsSold.toLocaleString();
+
+        document.getElementById('reportTableHeader').innerHTML = `<tr><th>Processing Date</th><th>Transaction No.</th><th>Product Name Descriptor</th><th>Quantity</th><th>Line Gross Value</th></tr>`;
+        document.getElementById('reportTableBody').innerHTML = leftRowsHtml;
+
+        // Render localized summary listings onto Right Panel view box
+        let rightTableRowsHtml = Object.keys(dailyDistributionAggregationMap).sort().reverse().map(day => `
+          <tr>
+            <td><strong>${day}</strong></td>
+            <td>${dailyDistributionAggregationMap[day].sold} items</td>
+            <td style="font-weight:700; color: var(--primary);">₱${dailyDistributionAggregationMap[day].revenue.toLocaleString('en-US', {minimumFractionDigits:2})}</td>
+          </tr>
+        `).join('');
+
+        document.getElementById('rightPanelContentContainer').innerHTML = `
+          <div style="width: 100%; max-height: 440px; overflow-y: auto;">
+            <table class="admin-table-frame">
+              <thead><tr><th>Business Day Date</th><th>Units Dispatched</th><th>Realized Income Gross</th></tr></thead>
+              <tbody>${rightTableRowsHtml || '<tr><td colspan="3" style="text-align:center; color:#94a3b8;">No performance distribution benchmarks calculated</td></tr>'}</tbody>
+            </table>
+          </div>
+        `;
+
+      } catch (err) {
+        console.error(err);
+        alert("Error handling contextual fetch pipeline operational sequence: " + err.message);
+      }
+    }
+
+    // REUSABLE INITIALIZATION ENGINE FOR GRAPH RENDERING
+    function renderChartJsEngineCanvasElement(labels, revenueData, unitsData) {
+      const ctx = document.getElementById('yearlyChartViewport').getContext('2d');
+      projectionChartInstance = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: labels,
+          datasets: [
+            { label: 'Sales Revenue (₱)', data: revenueData, backgroundColor: '#2563eb', borderRadius: 4, yAxisID: 'y' },
+            { label: 'Items Sold Count', data: unitsData, backgroundColor: '#94a3b8', borderRadius: 4, yAxisID: 'y1' }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            y: { type: 'linear', position: 'left', title: { display: true, text: 'Revenue (₱)' }, ticks: { callback: value => '₱' + value.toLocaleString() } },
+            y1: { type: 'linear', position: 'right', title: { display: true, text: 'Units Dispatched' }, grid: { drawOnChartArea: false }, ticks: { callback: value => value.toLocaleString() } }
+          }
+        }
+      });
+    }
+
+    // Run execution thread directly upon resource container mapping instantiation
+    window.onload = triggerReportRequestFetchData;
+  </script>
+</body>
+</html>

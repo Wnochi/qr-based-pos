@@ -1,0 +1,261 @@
+:root {
+    --primary: #2563eb;
+    --primary-dark: #1d4ed8;
+    --bg-main: #f8fafc;
+    --card-bg: #ffffff;
+    --text: #1e293b;
+    --border: #e2e8f0;
+    
+    /* Status Colors from Sketch Keys */
+    --status-green: #10b981; /* In Stock */
+    --status-yellow: #f59e0b; /* Low Stock */
+    --status-red: #ef4444; /* Out of Stock */
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+body {
+    background-color: var(--bg-main);
+    color: var(--text);
+}
+
+/* Master Top Navigation Frame */
+.navbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background-color: var(--card-bg);
+    padding: 1rem 2rem;
+    border-bottom: 2px solid var(--border);
+}
+
+.nav-brand {
+    font-size: 1.5rem;
+    font-weight: 800;
+    letter-spacing: 0.05em;
+}
+
+.nav-links {
+    display: flex;
+    gap: 1.5rem;
+}
+
+.nav-links a {
+    text-decoration: none;
+    color: var(--text);
+    font-weight: 600;
+    padding: 0.5rem 1rem;
+    border-radius: 0.375rem;
+    transition: background 0.2s;
+}
+
+.nav-links a:hover, .nav-links a.active {
+    background-color: #eff6ff;
+    color: var(--primary);
+}
+
+/* UI Layout Containers */
+.container {
+    padding: 2rem;
+    max-width: 1600px;
+    margin: 0 auto;
+}
+
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 2rem;
+    margin-top: 1.5rem;
+}
+
+/* Summary Blocks / Widgets */
+.metrics-row {
+    display: flex;
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.metric-card {
+    background: var(--card-bg);
+    padding: 1.5rem;
+    border-radius: 0.5rem;
+    border: 1px solid var(--border);
+    flex: 1;
+    text-align: center;
+}
+
+.metric-card h3 {
+    font-size: 0.875rem;
+    color: #64748b;
+    margin-bottom: 0.5rem;
+}
+
+.metric-card .value {
+    font-size: 1.75rem;
+    font-weight: 700;
+}
+
+/* Standardized Tables Layout */
+.panel-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 0.5rem;
+    padding: 1.5rem;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+
+.panel-title {
+    font-size: 1.2rem;
+    margin-bottom: 1rem;
+    font-weight: 700;
+}
+
+.pos-table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+}
+
+.pos-table th {
+    background-color: #f1f5f9;
+    padding: 0.75rem 1rem;
+    font-weight: 600;
+    border-bottom: 2px solid var(--border);
+}
+
+.pos-table td {
+    padding: 1rem;
+    border-bottom: 1px solid var(--border);
+    vertical-align: middle;
+}
+
+/* Status Bar Indicators */
+.status-indicator {
+    display: inline-block;
+    height: 8px;
+    width: 80px;
+    border-radius: 4px;
+}
+.status-indicator.green { background-color: var(--status-green); }
+.status-indicator.yellow { background-color: var(--status-yellow); }
+.status-indicator.red { background-color: var(--status-red); }
+
+/* Interactive Keypad UI components */
+.cashier-layout {
+    display: grid;
+    grid-template-columns: 1.2fr 0.8fr;
+    height: calc(100vh - 72px);
+}
+
+.scanned-items-pane {
+    padding: 2rem;
+    overflow-y: auto;
+    border-right: 2px solid var(--border);
+}
+
+.checkout-pane {
+    background-color: var(--card-bg);
+    padding: 2rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.form-group-inline {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.form-group-inline label {
+    font-weight: 600;
+}
+
+.form-group-inline input {
+    width: 60%;
+    padding: 0.5rem;
+    border: 1px solid var(--border);
+    border-radius: 0.25rem;
+    text-align: right;
+    font-size: 1.1rem;
+}
+
+.numpad-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.75rem;
+    margin-top: 1.5rem;
+}
+
+.btn-num {
+    background: #f1f5f9;
+    border: 1px solid var(--border);
+    padding: 1.25rem;
+    font-size: 1.5rem;
+    font-weight: 600;
+    border-radius: 0.5rem;
+    cursor: pointer;
+    transition: background 0.1s;
+}
+
+.btn-num:active {
+    background: #cbd5e1;
+}
+
+/* Action Buttons styling */
+.btn-primary {
+    background-color: var(--primary);
+    color: white;
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: 0.375rem;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.btn-primary:hover { background-color: var(--primary-dark); }
+
+/* Overlay Modal for New Item Creation Forms */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.5);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.modal-content {
+    background: var(--card-bg);
+    padding: 2rem;
+    border-radius: 0.5rem;
+    width: 500px;
+    max-width: 90%;
+}
+
+.form-field {
+    margin-bottom: 1.25rem;
+}
+
+.form-field label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+.form-field input {
+    width: 100%;
+    padding: 0.6rem;
+    border: 1px solid var(--border);
+    border-radius: 0.25rem;
+}

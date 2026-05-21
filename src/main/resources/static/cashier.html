@@ -1,0 +1,604 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Cashier Register Interface</title>
+  <link rel="stylesheet" href="/styles.css">
+  <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
+  <style>
+    :root {
+      --primary: #2563eb;
+      --primary-dark: #1d4ed8;
+      --bg-main: #f8fafc;
+      --card-bg: #ffffff;
+      --text: #1e293b;
+      --border: #e2e8f0;
+      --status-green: #10b981;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', system-ui, sans-serif; }
+    body { background-color: var(--bg-main); color: var(--text); height: 100vh; display: flex; flex-direction: column; }
+    
+    .navbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background-color: var(--card-bg);
+      padding: 1rem 2rem;
+      border-bottom: 2px solid var(--border);
+    }
+    .nav-brand { font-size: 1.25rem; font-weight: 800; letter-spacing: 0.05em; }
+    .nav-exit { text-decoration: none; color: #ef4444; font-weight: 600; padding: 0.5rem 1rem; border-radius: 0.375rem; }
+    .nav-exit:hover { background-color: #fef2f2; }
+
+    .cashier-layout { display: grid; grid-template-columns: 1.2fr 0.8fr; flex: 1; overflow: hidden; }
+    .scanned-items-pane { padding: 2rem; overflow-y: auto; border-right: 2px solid var(--border); }
+    
+    .checkout-pane {
+      background-color: var(--card-bg);
+      padding: 1rem 1.5rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+      gap: 1rem;
+      overflow-y: hidden; /* Prevent vertical screen scroll layout shifting */
+    }
+    .scan-ctrl-box { background: var(--bg-main); padding: 1rem; border-radius: 0.5rem; border: 1px solid var(--border); margin-bottom: 1.5rem; }
+    .scan-input-group { display: flex; gap: 0.5rem; margin-bottom: 0.75rem; }
+    .scan-input-group input { flex: 1; padding: 0.6rem; border: 1px solid var(--border); border-radius: 0.375rem; font-size: 1rem; }
+    
+    .btn { padding: 0.6rem 1.2rem; border: none; border-radius: 0.375rem; font-weight: 600; cursor: pointer; transition: background 0.1s; }
+    .btn-primary { background-color: var(--primary); color: white; }
+    .btn-primary:hover { background-color: var(--primary-dark); }
+    .btn-secondary { background: #e2e8f0; color: var(--text); }
+    .btn-secondary:hover { background: #cbd5e1; }
+    .btn-danger { background: #ef4444; color: white; }
+    .btn-danger:hover { background: #dc2626; }
+
+    .pos-table { width: 100%; border-collapse: collapse; text-align: left; margin-top: 1rem; }
+    .pos-table th { background-color: #f1f5f9; padding: 0.75rem 1rem; font-weight: 600; border-bottom: 2px solid var(--border); }
+    .pos-table td { padding: 1rem; border-bottom: 1px solid var(--border); vertical-align: middle; }
+
+    .checkout-summary { display: flex; flex-direction: column; gap: 1rem; }
+    .form-group-inline { display: flex; justify-content: space-between; align-items: center; }
+    .form-group-inline label { font-weight: 600; font-size: 1.05rem; }
+    .form-group-inline input, .form-group-inline select { width: 55%; padding: 0.6rem; border: 1px solid var(--border); border-radius: 0.375rem; text-align: right; font-size: 1.1rem; background: #fff; }
+
+    .numpad-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0.35rem;
+      margin-top: 0.75rem;
+    }
+    .btn-num {
+      background: #f1f5f9;
+      border: 1px solid var(--border);
+      padding: 0.6rem;
+      font-size: 1.2rem;
+      font-weight: 700;
+      border-radius: 0.5rem;
+      cursor: pointer;
+    }
+    .btn-num:active { background: #cbd5e1; }
+
+    #scanResult { margin-top: 0.5rem; font-weight: 600; color: var(--primary); }
+  </style>
+</head>
+<body>
+
+  <div class="navbar">
+    <div class="nav-brand">POS SYSTEM — CASHIER </div>
+    <a href="/index.html" class="nav-exit">Exit Register</a>
+  </div>
+
+  <div class="cashier-layout">
+    <div class="scanned-items-pane">
+      
+      <div id="scanningSection">
+        <div class="scan-ctrl-box">
+          <div class="scan-input-group">
+            <input id="qrInput" placeholder="Enter QR / Product ID">
+                <button id="scanBtn" class="btn btn-primary" style="display: none;">Scan ID</button>
+        </div>
+          <div style="display: flex; gap: 0.5rem;">
+            <button id="startCamBtn" type="button" class="btn btn-secondary">Start Camera</button>
+            <button id="stopCamBtn" type="button" class="btn btn-secondary" style="display: none;" disabled>Stop Camera</button>
+          </div>
+          <div id="cameraContainer">
+            <video id="video" style="display:none; margin-top: 8px; border-radius: 0.5rem; border: 2px solid var(--border); transform: scaleX(-1);" playsinline autoplay></video>
+            <canvas id="videoCanvas" style="display:none;"></canvas>
+          </div>
+          <div id="scanResult"></div>
+        </div>
+
+        <h2 style="font-size: 1.25rem; font-weight: 700; margin-bottom: 0.5rem;">Scanned Items List</h2>
+        <table class="pos-table">
+          <thead>
+            <tr>
+              <th>Product Description</th>
+              <th>Qty</th>
+              <th>Unit Price</th>
+              <th>Subtotal</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="cartTableBody"></tbody>
+        </table>
+        <ul id="cartItems" style="display: none;"></ul> 
+      </div>
+
+      <div id="receiptSection" style="display: none; padding: 1.5rem; background: #ffffff; color: var(--text); border-radius: 0.5rem; border: 1px solid var(--border); box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);">
+        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--border); padding-bottom: 0.75rem; margin-bottom: 1.25rem;">
+          <h2 style="color: var(--text); font-size: 1.3rem; font-weight: 700;">🧾 Transaction Summary</h2>
+          <span style="background: #f1f5f9; color: #64748b; padding: 0.35rem 0.6rem; border-radius: 0.25rem; font-size: 0.85rem; font-weight: bold;">Press [Esc] for Next Sale</span>
+        </div>
+        
+<div id="receiptDisplayBox" style="font-size: 1rem; line-height: 1.5; padding: 0.5rem;"></div>
+
+        <div style="margin-top: 1.5rem; display: flex; gap: 1rem; border-top: 1px solid var(--border); padding-top: 1.25rem;">
+          <button class="btn btn-primary" onclick="triggerBrowserPrint()"> Save PDF / Print Preview</button>
+          <button class="btn btn-secondary" style="background: #e2e8f0; color: var(--text);" onclick="resetToNewTransaction()">Start New Sale (Esc)</button>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="checkout-pane">
+      <div class="checkout-summary">
+        <div class="form-group-inline">
+          <label>Total Balance Due</label>
+          <div id="cartTotal" style="font-size: 1.75rem; font-weight: 800; color: var(--primary);">₱0.00</div>
+        </div>
+        <div class="form-group-inline">
+          <label>Payment Mode</label>
+          <select id="paymentMethod">
+            <option value="CASH">Cash</option>
+          </select>
+        </div>
+        <div class="form-group-inline">
+          <label>Cash Amount Received</label>
+          <input id="paidAmount" type="number" value="0">
+        </div>
+      </div>
+
+      <div>
+        <div class="numpad-grid">
+          <button type="button" class="btn-num" onclick="pressVirtualKey('7')">7</button>
+          <button type="button" class="btn-num" onclick="pressVirtualKey('8')">8</button>
+          <button type="button" class="btn-num" onclick="pressVirtualKey('9')">9</button>
+          <button type="button" class="btn-num" onclick="pressVirtualKey('4')">4</button>
+          <button type="button" class="btn-num" onclick="pressVirtualKey('5')">5</button>
+          <button type="button" class="btn-num" onclick="pressVirtualKey('6')">6</button>
+          <button type="button" class="btn-num" onclick="pressVirtualKey('1')">1</button>
+          <button type="button" class="btn-num" onclick="pressVirtualKey('2')">2</button>
+          <button type="button" class="btn-num" onclick="pressVirtualKey('3')">3</button>
+          <button type="button" class="btn-num" onclick="pressVirtualKey('.')">.</button>
+          <button type="button" class="btn-num" onclick="pressVirtualKey('0')">0</button>
+          <button type="button" class="btn-num" onclick="pressVirtualKey('CLEAR')" style="color: #ef4444;">⌫</button>
+        </div>
+
+        <button id="completeBtn" class="btn btn-primary" style="width: 100%; margin-top: 1rem; padding: 1rem; font-size: 1.15rem; border-radius: 0.5rem;">Complete Transaction & Print</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="/app.js"></script>
+
+  <script>
+    async function apiPost(url, data) {
+      return await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      });
+    }
+
+    function fmt(val) {
+      return '₱' + parseFloat(val).toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,');
+    }
+
+    let isBeeping = false;
+
+    function playScanBeep() {
+      if (isBeeping) return; 
+      isBeeping = true;
+
+      try {
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        const oscillator = audioCtx.createOscillator();
+        const gainNode = audioCtx.createGain();
+
+        oscillator.connect(gainNode);
+        gainNode.connect(audioCtx.destination);
+
+        oscillator.type = 'sine';
+        oscillator.frequency.value = 1500;
+        gainNode.gain.setValueAtTime(0.12, audioCtx.currentTime);
+        
+        oscillator.start();
+        oscillator.stop(audioCtx.currentTime + 0.04);
+        
+        setTimeout(() => { isBeeping = false; }, 80);
+      } catch (e) {
+        console.warn("Audio Context blocked or unsupported:", e);
+        isBeeping = false;
+      }
+    }
+
+    const qrInput = document.getElementById('qrInput');
+    const scanBtn = document.getElementById('scanBtn');
+    const scanResult = document.getElementById('scanResult');
+    const startCamBtn = document.getElementById('startCamBtn');
+    const stopCamBtn = document.getElementById('stopCamBtn');
+    const videoEl = document.getElementById('video');
+    const videoCanvas = document.getElementById('videoCanvas');
+    const canvasCtx = videoCanvas.getContext && videoCanvas.getContext('2d');
+    const cartItemsEl = document.getElementById('cartItems');
+    const cartTableBody = document.getElementById('cartTableBody');
+    const cartTotalEl = document.getElementById('cartTotal');
+    const completeBtn = document.getElementById('completeBtn');
+    const paymentMethodEl = document.getElementById('paymentMethod');
+    const paidAmountEl = document.getElementById('paidAmount');
+
+    let cart = [];
+
+    function renderCart() {
+      cartTableBody.innerHTML = '';
+      cartItemsEl.innerHTML = '';
+      let total = 0;
+      
+      if (cart.length === 0) {
+        cartTableBody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: #94a3b8;">No items scanned into transaction cart yet.</td></tr>`;
+        cartTotalEl.textContent = '₱0.00';
+        return;
+      }
+
+      cart.forEach((it, idx) => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td style="font-weight: 600;">${it.name}</td>
+          <td>${it.quantity}</td>
+          <td>${fmt(it.unitPrice)}</td>
+          <td style="font-weight: 700; color: var(--text);">${fmt(it.unitPrice * it.quantity)}</td>
+          <td></td>
+        `;
+        
+        const remBtn = document.createElement('button');
+        remBtn.className = 'btn btn-danger';
+        remBtn.style.padding = '0.25rem 0.5rem';
+        remBtn.style.fontSize = '0.8rem';
+        remBtn.textContent = 'Remove';
+        remBtn.onclick = () => { cart.splice(idx,1); renderCart(); };
+        
+        tr.children[4].appendChild(remBtn);
+        cartTableBody.appendChild(tr);
+
+        const fallbackLi = document.createElement('li');
+        fallbackLi.textContent = `${it.name} x${it.quantity}`;
+        cartItemsEl.appendChild(fallbackLi);
+
+        total += it.unitPrice * it.quantity;
+      });
+      cartTotalEl.textContent = fmt(total);
+    }
+
+    function pressVirtualKey(characterValue) {
+      let currentVal = paidAmountEl.value.toString();
+      if (characterValue === 'CLEAR') {
+        paidAmountEl.value = currentVal.slice(0, -1) || '0';
+      } else {
+        if (currentVal === '0' && characterValue !== '.') {
+          paidAmountEl.value = characterValue;
+        } else {
+          if (characterValue === '.' && currentVal.includes('.')) return;
+          paidAmountEl.value += characterValue;
+        }
+      }
+    }
+
+    scanBtn.onclick = async () => {
+      const qr = qrInput.value.trim();
+      if (!qr) { alert('Enter QR/product id'); return; }
+      
+      playScanBeep();
+      scanResult.textContent = 'Looking up...';
+      try {
+        const resp = await apiPost('/api/cashier/transaction/scan', {qr});
+        
+        if (!resp.ok) {
+          scanResult.textContent = 'Not found or error';
+          alert('Product not found!');
+          qrInput.value = '';
+          qrInput.focus();
+          return;
+        }
+        
+        const prod = await resp.json();
+        const unitPrice = parseFloat(prod.price || prod.price?.toString?.() || 0);
+        scanResult.textContent = '';
+
+        const quantityInput = prompt(`Found: ${prod.name}\nPrice: ${fmt(unitPrice)}\nStock: ${prod.stock}\n\nEnter Quantity:`, '1');
+        
+        if (quantityInput === null) {
+          qrInput.value = '';
+          qrInput.focus();
+          return;
+        }
+
+        const q = parseInt(quantityInput, 10);
+        if (isNaN(q) || q <= 0) {
+          alert('Invalid quantity!');
+          qrInput.value = '';
+          qrInput.focus();
+          return;
+        }
+        
+        cart.push({productId: prod.id, name: prod.name, unitPrice, quantity: q});
+        renderCart();
+        
+        qrInput.value = '';
+        qrInput.focus();
+
+      } catch (e) {
+        scanResult.textContent = 'Error: ' + e;
+        alert('Error: ' + e);
+      }
+    };
+
+    // --- Camera Support and QR Detection Logic ---
+    let videoStream = null;
+    let barcodeDetector = null;
+    let scanning = false;
+    let hasScanned = false; 
+
+    startCamBtn.onclick = startCamera;
+    stopCamBtn.onclick = stopCamera;
+
+    async function startCamera() {
+      hasScanned = false;
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        alert('Camera not supported in this browser');
+        return;
+      }
+      try {
+        videoStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
+        videoEl.srcObject = videoStream;
+        videoEl.style.display = 'block';
+        videoEl.style.width = '100%';
+        videoEl.style.height = 'auto';
+        videoEl.style.maxHeight = '200px';
+        
+        startCamBtn.style.display = 'none';
+        stopCamBtn.style.display = 'inline-block';
+        stopCamBtn.disabled = false;
+        
+        scanResult.textContent = 'Camera started';
+        scanning = true;
+        requestAnimationFrame(detectLoop);
+      } catch (e) {
+        scanResult.textContent = 'Camera error: ' + (e && e.message ? e.message : e);
+      }
+    }
+
+    function stopCamera() {
+      if (videoStream) {
+        videoStream.getTracks().forEach(t => t.stop());
+        videoStream = null;
+      }
+      try { videoEl.srcObject = null; } catch (e) {}
+      videoEl.style.display = 'none';
+      
+      startCamBtn.style.display = 'inline-block';
+      startCamBtn.disabled = false;
+      stopCamBtn.style.display = 'none';
+      
+      scanning = false;
+      scanResult.textContent = 'Camera stopped';
+    }
+
+    async function detectLoop() {
+      if (!scanning) return;
+      try {
+        if (videoEl.readyState === videoEl.HAVE_ENOUGH_DATA) {
+          if (videoEl.videoWidth > 0 && (videoCanvas.width !== videoEl.videoWidth)) {
+            videoCanvas.width = videoEl.videoWidth;
+            videoCanvas.height = videoEl.videoHeight;
+          }
+
+          if ('BarcodeDetector' in window) {
+            if (!barcodeDetector) {
+              try {
+                barcodeDetector = new BarcodeDetector({ formats: ['qr_code'] });
+              } catch (e) {
+                barcodeDetector = null;
+              }
+            }
+            if (barcodeDetector) {
+              const barcodes = await barcodeDetector.detect(videoEl);
+              if (barcodes && barcodes.length > 0) {
+                onDetected(barcodes[0].rawValue);
+                return;
+              }
+            }
+          } 
+          
+          if (canvasCtx && window.jsQR) {
+            canvasCtx.drawImage(videoEl, 0, 0, videoCanvas.width, videoCanvas.height);
+            const imageData = canvasCtx.getImageData(0, 0, videoCanvas.width, videoCanvas.height);
+            
+            const code = jsQR(imageData.data, imageData.width, imageData.height, {
+              inversionAttempts: "dontInvert",
+            });
+            
+            if (code) {
+              onDetected(code.data);
+              return;
+            }
+          }
+        }
+      } catch (e) {
+        console.error('Scanner core loop error:', e);
+      }
+      requestAnimationFrame(detectLoop);
+    }
+
+    function onDetected(code) {
+      if (hasScanned) return;
+      hasScanned = true;
+
+      playScanBeep();
+      scanResult.textContent = 'Detected: ' + code;
+      qrInput.value = code;
+      
+      stopCamera();
+      setTimeout(() => scanBtn.click(), 250);
+    }
+
+    window.addEventListener('beforeunload', () => { try { stopCamera(); } catch (e) {} });
+
+    completeBtn.onclick = async () => {
+      if (cart.length === 0) { alert('Cart is empty'); return; }
+      
+      const currentCart = [...cart]; // Take a snapshot for display before clearing
+      const totalAmount = currentCart.reduce((sum, item) => sum + (item.unitPrice * item.quantity), 0);
+      const paymentMethod = paymentMethodEl.value;
+      const paidAmount = parseFloat(paidAmountEl.value) || 0;
+      const changeAmount = paidAmount - totalAmount;
+
+      const items = currentCart.map(i => ({productId: i.productId, quantity: i.quantity}));
+      
+      try {
+        const resp = await apiPost('/api/cashier/transaction/complete', {items, paymentMethod, paidAmount});
+        if (!resp.ok) { const text = await resp.text(); alert('Error: ' + text); return; }
+        const json = await resp.json();
+        
+        let itemsHtml = currentCart.map(item => `
+          <div style="display: flex; justify-content: space-between; padding: 0.5rem 0; border-bottom: 1px dashed var(--border);">
+            <div>
+              <div style="font-weight: 600; color: var(--text);">${item.name}</div>
+              <div style="font-size: 0.85rem; color: #64748b;">${item.quantity} x ${fmt(item.unitPrice)}</div>
+            </div>
+            <div style="font-weight: 700; align-self: center;">${fmt(item.unitPrice * item.quantity)}</div>
+          </div>
+        `).join('');
+
+        document.getElementById('receiptDisplayBox').innerHTML = `
+          <div style="margin-bottom: 1rem; font-size: 0.9rem; color: #64748b;">
+            <div><strong>Transaction Reference:</strong> <span style="font-family: monospace;">${json.id || 'N/A'}</span></div>
+            <div><strong>Date:</strong> ${new Date().toLocaleString()}</div>
+          </div>
+          
+          <div style="margin-bottom: 1.5rem;">
+            <h4 style="font-size: 0.95rem; text-transform: uppercase; letter-spacing: 0.05em; color: #64748b; margin-bottom: 0.5rem; border-bottom: 1px solid var(--border); padding-bottom: 0.25rem;">Purchased Items</h4>
+            ${itemsHtml}
+          </div>
+
+          <div style="background: #f8fafc; padding: 1rem; border-radius: 0.375rem; display: flex; flex-direction: column; gap: 0.5rem;">
+            <div style="display: flex; justify-content: space-between;">
+              <span style="color: #64748b;">Subtotal</span>
+              <span style="font-weight: 600;">${fmt(totalAmount)}</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; font-size: 1.25rem; font-weight: 800; border-top: 2px solid var(--border); padding-top: 0.5rem; margin-top: 0.25rem;">
+              <span>Total Paid Due</span>
+              <span style="color: var(--primary);">${fmt(totalAmount)}</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; font-size: 0.95rem; margin-top: 0.25rem;">
+              <span style="color: #64748b;">Payment Method (${paymentMethod})</span>
+              <span>${fmt(paidAmount)}</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; font-size: 1.05rem; font-weight: 700; color: #10b981; border-top: 1px dashed var(--border); padding-top: 0.5rem;">
+              <span>Change</span>
+              <span>${fmt(Math.max(0, changeAmount))}</span>
+            </div>
+          </div>
+          
+          <div style="text-align: center; margin-top: 1.5rem; color: #94a3b8; font-weight: 600; font-size: 0.9rem;">
+             Thank you for shopping with us!
+          </div>
+        `;
+        
+        // SWAP INTERFACE VIEWS
+        document.getElementById('scanningSection').style.display = 'none';
+        document.getElementById('receiptSection').style.display = 'block';
+        
+        // Reset local cart variables safely
+        cart = [];
+        paidAmountEl.value = '0';
+        renderCart();
+      } catch (e) {
+        alert('Error: ' + e);
+      }
+    };
+
+    // Close / Reset Receipt Interface Utility Helpers
+    function resetToNewTransaction() {
+      document.getElementById('receiptSection').style.display = 'none';
+      document.getElementById('scanningSection').style.display = 'block';
+      qrInput.value = '';
+      qrInput.focus();
+    }
+
+    function triggerBrowserPrint() {
+      const receiptContent = document.getElementById('receiptDisplayBox').textContent;
+      const printWindow = window.open('', '_blank');
+      printWindow.document.write(`<pre style="font-family:monospace; padding:20px; font-size:16px;">${receiptContent}</pre>`);
+      printWindow.document.close();
+      printWindow.print();
+    }
+
+    // --- PHYSICAL KEYBOARD HOTKEYS & NUMPAD EVENT STREAM ---
+    window.addEventListener('keydown', function(event) {
+      
+      // If receipt display is visible, pressing Escape returns to normal tracking state
+      if (event.key === 'Escape') {
+        if (document.getElementById('receiptSection').style.display === 'block') {
+          event.preventDefault();
+          resetToNewTransaction();
+          return;
+        }
+      }
+
+      // 1. Enter key inside the QR Input field triggers item lookup scan
+      if (event.key === 'Enter' && document.activeElement === qrInput) {
+        event.preventDefault();
+        scanBtn.click();
+      }
+      
+      // 2. I handles Camera toggle
+      if (event.key === 'I') {
+        event.preventDefault();
+        if (startCamBtn.style.display !== 'none') {
+          startCamBtn.click();
+        } else {
+          stopCamBtn.click();
+        }
+      }
+
+      if (event.key === 'U') {
+        event.preventDefault();
+        paidAmountEl.focus();
+        paidAmountEl.select();
+      }
+
+      // 4. Enter key inside Cash Input completes transaction automatically
+      if (event.key === 'Enter' && document.activeElement === paidAmountEl) {
+        event.preventDefault();
+        completeBtn.click();
+      }
+
+      // 5. PHYSICAL NUMPAD MAPPING
+      if (document.activeElement !== qrInput) {
+        if ((event.key >= '0' && event.key <= '9') || event.key === '.') {
+          event.preventDefault(); 
+          pressVirtualKey(event.key);
+        }
+        if (event.key === 'Backspace') {
+          event.preventDefault();
+          pressVirtualKey('CLEAR');
+        }
+      }
+    });
+
+    renderCart();
+  </script>
+</body>
+</html>
