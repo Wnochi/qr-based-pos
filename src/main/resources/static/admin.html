@@ -862,7 +862,7 @@
       let monthlyAccumulator = new Array(12).fill(0);
 
       recordsList.forEach(tx => {
-        const txAmount = parseFloat(tx.total || 0);
+        const txAmount = parseFloat(tx.totalAmount ?? tx.total ?? 0);
         runningRevenueSum += txAmount;
         
         if (tx.createdAt) {
@@ -875,11 +875,16 @@
         }
         
         let itemBreakdownString = "";
-        if (tx.items && tx.items.length > 0) {
-          itemBreakdownString = tx.items.map(i => {
+        const items = tx.items || [];
+        if (items.length > 0) {
+          itemBreakdownString = items.map(i => {
             runningItemsSum += parseInt(i.quantity || 0, 10);
             return `${i.name} (x${i.quantity})`;
           }).join(', ');
+        } else if (typeof tx.itemsCount === 'number' && tx.itemsCount > 0) {
+          // Fallback when backend provides only an itemsCount (no item details)
+          runningItemsSum += tx.itemsCount;
+          itemBreakdownString = `Items: ${tx.itemsCount}`;
         } else {
           itemBreakdownString = "<span style='color:#9ca3af; font-style:italic;'>No sub-items details mapped</span>";
         }

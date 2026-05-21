@@ -103,6 +103,39 @@ public class AdminController {
         return productRepository.findAll();
     }
 
+    @GetMapping("/transactions")
+    public ResponseEntity<List<Map<String, Object>>> transactions() {
+        List<Transaction> allTransactions = transactionRepository.findAllWithItems();
+        List<Map<String, Object>> out = new ArrayList<>();
+
+        for (Transaction tx : allTransactions) {
+            Map<String, Object> m = new HashMap<>();
+            m.put("id", tx.getId());
+            m.put("createdAt", tx.getCreatedAt() != null ? tx.getCreatedAt().toString() : null);
+            m.put("totalAmount", tx.getTotal() != null ? tx.getTotal() : BigDecimal.ZERO);
+
+            // itemsCount: sum of quantities across items (matches frontend expectation)
+            int itemsCount = 0;
+            if (tx.getItems() != null) {
+                for (var it : tx.getItems()) {
+                    try {
+                        itemsCount += it.getQuantity();
+                    } catch (Exception ex) { /* ignore malformed item */ }
+                }
+            }
+            m.put("itemsCount", itemsCount);
+
+            // include item details and other useful fields for the frontend
+            m.put("items", tx.getItems());
+            m.put("paymentMethod", tx.getPaymentMethod());
+            m.put("paidAmount", tx.getPaidAmount());
+
+            out.add(m);
+        }
+
+        return ResponseEntity.ok(out);
+    }
+
     @PostMapping("/products/{id}/qr")
     public ResponseEntity<?> generateQr(@PathVariable String id) throws WriterException, IOException {
         Optional<Product> p = productRepository.findById(id);
