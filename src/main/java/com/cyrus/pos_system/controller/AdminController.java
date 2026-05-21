@@ -23,6 +23,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.cyrus.pos_system.controller.dto.TransactionItemResponse;
 import com.cyrus.pos_system.model.Product;
 import com.cyrus.pos_system.model.Transaction;
 import com.cyrus.pos_system.repository.ProductRepository;
@@ -126,7 +127,19 @@ public class AdminController {
             m.put("itemsCount", itemsCount);
 
             // include item details and other useful fields for the frontend
-            m.put("items", tx.getItems());
+            // Map entity items to DTOs to avoid serializing back-references
+            List<TransactionItemResponse> itemResponses = new ArrayList<>();
+            if (tx.getItems() != null) {
+                tx.getItems().forEach(it -> {
+                    try {
+                        java.math.BigDecimal subtotal = it.getUnitPrice() != null ? it.getUnitPrice().multiply(java.math.BigDecimal.valueOf(it.getQuantity())) : java.math.BigDecimal.ZERO;
+                        itemResponses.add(new TransactionItemResponse(it.getProductId(), it.getName(), it.getUnitPrice(), it.getQuantity(), subtotal));
+                    } catch (Exception ex) {
+                        // skip malformed item
+                    }
+                });
+            }
+            m.put("items", itemResponses);
             m.put("paymentMethod", tx.getPaymentMethod());
             m.put("paidAmount", tx.getPaidAmount());
 
