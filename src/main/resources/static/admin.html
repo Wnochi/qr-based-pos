@@ -362,8 +362,8 @@
       max-width: 500px;
     }
 
-    /* --- Responsive: Mobile Navigation, Tables, and Form Optimizations --- */
-    .mobile-menu-toggle {
+    /* Logo used as the mobile toggle button */
+    .mobile-logo-toggle {
       display: none;
       background: transparent;
       border: none;
@@ -371,6 +371,17 @@
       padding: 0.25rem 0.6rem;
       border-radius: var(--radius-sm);
       cursor: pointer;
+    }
+
+    /* When mobile nav is open, hide the logo-toggle if desired */
+    body.nav-open .mobile-logo-toggle {
+      display: none;
+    }
+
+    @media (min-width: 1200px) and (orientation: landscape) {
+      .mobile-logo-toggle {
+        display: none;
+      }
     }
 
     .mobile-nav {
@@ -386,91 +397,56 @@
     .mobile-nav-inner {
       background: var(--card-bg);
       width: 82%;
-      max-width: 360px;
+      max-width: 320px;
       height: 100%;
-      padding: 1rem;
-      box-shadow: 2px 0 18px rgba(0,0,0,0.12);
+      padding: 1.2rem 1rem;
+      box-shadow: 4px 0 20px rgba(0,0,0,0.12);
       overflow-y: auto;
+      display: flex;
+      flex-direction: column;
     }
 
-    .mobile-nav-close {
-      background: transparent;
-      border: none;
-      font-size: 1.25rem;
-      float: right;
-      cursor: pointer;
+    .mobile-nav-links { 
+      display: flex; 
+      flex-direction: column; 
+      gap: 0.6rem; 
+      margin-top: 1.2rem; 
+    }
+    
+    .mobile-nav-links .nav-link { 
+      text-align: left; 
+      padding: 0.9rem 1rem; 
+      font-size: 1.02rem; 
+      border-radius: 8px; 
+      width: 100%; 
+    }
+    
+    body.nav-open { 
+      overflow: hidden; 
     }
 
-    .mobile-nav-links { display: flex; flex-direction: column; gap: 0.5rem; margin-top: 1rem; }
-    .mobile-nav-links .nav-link { text-align: left; padding: 0.9rem 1rem; font-size: 1.02rem; border-radius: 8px; width: 100%; }
-    body.nav-open { overflow: hidden; }
-
-    /* Responsive: Mobile Navigation, Tables, and Form Optimizations */
-    .mobile-menu-toggle {
-      display: none;
-      background: transparent;
-      border: none;
-      font-size: 1.45rem;
-      padding: 0.25rem 0.6rem;
-      border-radius: var(--radius-sm);
-      cursor: pointer;
-    }
-
-    .mobile-nav {
-      display: none;
-      position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,0.35);
-      z-index: 9998;
-      align-items: flex-start;
-      justify-content: flex-start;
-    }
-
-    .mobile-nav-inner {
-      background: var(--card-bg);
-      width: 82%;
-      max-width: 360px;
-      height: 100%;
-      padding: 1rem;
-      box-shadow: 2px 0 18px rgba(0,0,0,0.12);
-      overflow-y: auto;
-    }
-
-    .mobile-nav-close {
-      background: transparent;
-      border: none;
-      font-size: 1.25rem;
-      float: right;
-      cursor: pointer;
-    }
-
-    .mobile-nav-links { display: flex; flex-direction: column; gap: 0.5rem; margin-top: 1rem; }
-    .mobile-nav-links .nav-link { text-align: left; padding: 0.9rem 1rem; font-size: 1.02rem; border-radius: 8px; width: 100%; }
-    body.nav-open { overflow: hidden; }
-
-    /* Fixes high-resolution portrait views on flagship phones */
     @media (max-width: 1199px) or (orientation: portrait) {
-      .nav-menu { display: none; }
-      .mobile-menu-toggle { display: inline-flex; }
-      .navbar { padding: 0.75rem 1rem; }
+      .nav-menu, .nav-exit { display: none !important; }
+      
+      .mobile-logo-toggle { display: inline-flex !important; }
+      body.nav-open .mobile-logo-toggle { display: none !important; }
 
+      .nav-left { gap: 1rem; }
+
+      .navbar { padding: 0.75rem 1rem; }
       .admin-viewport { padding: 1rem; }
 
-      /* Force dashboard panels and metrics to stack vertically instead of side-by-side columns */
       .dashboard-grid { grid-template-columns: 1fr; gap: 1.5rem; }
       .metrics-row { grid-template-columns: 1fr; gap: 1rem; }
 
-      /* Stack form fields */
       .form-field-group { flex-direction: column; align-items: stretch; }
       .form-field-group label { width: 100%; margin-bottom: 0.45rem; }
       .form-input-box { width: 100%; }
       .form-button-actions-row { flex-direction: column; gap: 0.85rem; }
       .form-button-actions-row .btn-submit { width: 100%; padding: 0.9rem 1rem; font-size: 1rem; }
 
-      /* Touch targets */
       .btn-action, .btn-submit { min-height: 44px; padding: 0.6rem 0.9rem; }
 
-      /* Responsive table -> card list */
       .admin-table { display: block; }
       .admin-table thead { display: none; }
       .admin-table tbody { display: grid; gap: 0.85rem; }
@@ -478,7 +454,6 @@
       .admin-table td { display: flex; justify-content: space-between; padding: 0.45rem 0; border: none; }
       .admin-table td::before { content: attr(data-label); font-weight: 700; color: #6b7280; margin-right: 0.6rem; flex: 0 0 48%; text-align: left; }
 
-      /* Sales filters stack */
       .filters-row { display: flex; flex-direction: column; gap: 0.8rem; }
       .filters-row > div { min-width: auto !important; }
     }
@@ -488,10 +463,9 @@
 
   <div class="navbar">
     <div class="nav-left">
-      <a href="/index.html" style="display: flex; align-items: center; text-decoration: none;">
+      <button class="mobile-logo-toggle" aria-label="Toggle menu" onclick="toggleMobileNav()" style="display: flex; align-items: center; background: transparent; border: none; padding: 0; cursor: pointer;">
         <img src="Logo.jpg" alt="Website Logo" style="height: 45px; width: auto; object-fit: contain;">
-      </a>
-      <button id="mobileMenuToggle" class="mobile-menu-toggle" aria-label="Open menu" onclick="toggleMobileNav()">☰</button>
+      </button>
       <div class="nav-menu">
         <button id="tab-dashboard" class="nav-link active" onclick="switchMainTab('dashboard')">Dashboard</button>
         <button id="tab-inventory" class="nav-link" onclick="switchMainTab('inventory')">Inventory</button>
@@ -501,15 +475,21 @@
     <a href="/index.html" class="nav-exit">Exit</a>
   </div>
 
-  <div id="mobileNavOverlay" class="mobile-nav" aria-hidden="true" role="dialog">
+  <div id="mobileNavOverlay" class="mobile-nav" aria-hidden="true" style="display: none;">
     <div class="mobile-nav-inner">
-      <button class="mobile-nav-close" onclick="toggleMobileNav()" aria-label="Close menu">✕</button>
-      <nav class="mobile-nav-links">
-        <button onclick="toggleMobileNav(); switchMainTab('dashboard')" class="nav-link">Dashboard</button>
-        <button onclick="toggleMobileNav(); switchMainTab('inventory')" class="nav-link">Inventory</button>
-        <button onclick="toggleMobileNav(); switchMainTab('sales')" class="nav-link">Sales Report</button>
-        <a href="/index.html" class="nav-exit">Exit</a>
-      </nav>
+      <div class="navbar-logo" onclick="toggleMobileNav()" style="cursor: pointer; padding-bottom: 1rem; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; width: 100%;">
+        <div style="display: flex; align-items: center; gap: 0.5rem;">
+          <img src="Logo.jpg" alt="Logo" style="height: 35px; width: auto; object-fit: contain;">
+          <span class="logo-text" style="font-weight: 700; color: var(--text);">MiniLikha</span>
+        </div>
+        <span style="font-size: 0.85rem; color: var(--muted); font-weight: 600; background: var(--border); padding: 4px 10px; border-radius: 6px;">✕ Close</span>
+      </div>
+      
+      <div class="mobile-nav-links">
+        <button class="nav-link active" onclick="switchMainTab('dashboard'); toggleMobileNav()">Dashboard</button>
+        <button class="nav-link" onclick="switchMainTab('inventory'); toggleMobileNav()"> Inventory</button>
+        <button class="nav-link" onclick="switchMainTab('sales'); toggleMobileNav()">Sales Analytics</button>
+      </div>
     </div>
   </div>
 
@@ -923,52 +903,50 @@
     }
 
     async function saveProductFormDetails() {
-  const name = document.getElementById('formName').value.trim();
-  const price = parseFloat(document.getElementById('formPrice').value);
-  const stock = parseInt(document.getElementById('formStock').value, 10);
-  const threshold = parseInt(document.getElementById('formThreshold').value, 10) || 5;
-  let qrCodeBase64 = document.getElementById('formQR').value.trim();
+      const name = document.getElementById('formName').value.trim();
+      const price = parseFloat(document.getElementById('formPrice').value);
+      const stock = parseInt(document.getElementById('formStock').value, 10);
+      const threshold = parseInt(document.getElementById('formThreshold').value, 10) || 5;
+      let qrCodeBase64 = document.getElementById('formQR').value.trim();
 
-  if (!name || isNaN(price) || isNaN(stock)) {
-    alert('Fill out name, price, and stock fields correctly');
-    return; 
-  }
+      if (!name || isNaN(price) || isNaN(stock)) {
+        alert('Fill out name, price, and stock fields correctly');
+        return; 
+      }
 
-  const editId = document.getElementById('inventory-sub-create').getAttribute('data-edit-id');
-  
-  // Create multi-part form constructor mapping
-  const formData = new FormData();
-  if (editId) {
-    formData.append('id', editId);
-  }
-  formData.append('name', name);
-  formData.append('price', price);
-  formData.append('stock', stock);
-  formData.append('threshold', threshold);
-  formData.append('qrCodeBase64', qrCodeBase64);
+      const editId = document.getElementById('inventory-sub-create').getAttribute('data-edit-id');
+      
+      const formData = new FormData();
+      if (editId) {
+        formData.append('id', editId);
+      }
+      formData.append('name', name);
+      formData.append('price', price);
+      formData.append('stock', stock);
+      formData.append('threshold', threshold);
+      formData.append('qrCodeBase64', qrCodeBase64);
 
-  // Grab the image element file descriptor link reference
-  const fileInput = document.getElementById('fileInputStream');
-  if (fileInput.files && fileInput.files.length > 0) {
-    formData.append('image', fileInput.files[0]);
-  }
+      const fileInput = document.getElementById('fileInputStream');
+      if (fileInput.files && fileInput.files.length > 0) {
+        formData.append('image', fileInput.files[0]);
+      }
 
-  try {
-    const response = await fetch('/api/admin/products', {
-      method: 'POST',
-      body: formData
-    });
-    
-    if (response.ok) {
-      alert(editId ? 'Product details successfully updated!' : 'New product successfully saved!');
-      toggleInventorySubView();
-    } else {
-      alert('Operational error saving form details payload.');
+      try {
+        const response = await fetch('/api/admin/products', {
+          method: 'POST',
+          body: formData
+        });
+        
+        if (response.ok) {
+          alert(editId ? 'Product details successfully updated!' : 'New product successfully saved!');
+          toggleInventorySubView();
+        } else {
+          alert('Operational error saving form details payload.');
+        }
+      } catch(e) {
+        alert('Connection error: ' + e);
+      }
     }
-  } catch(e) {
-    alert('Connection error: ' + e);
-  }
-}
 
     async function loadSalesReport() {
       try {
@@ -1028,7 +1006,6 @@
             return `${i.name} (x${i.quantity})`;
           }).join(', ');
         } else if (typeof tx.itemsCount === 'number' && tx.itemsCount > 0) {
-          // Fallback when backend provides only an itemsCount (no item details)
           runningItemsSum += tx.itemsCount;
           itemBreakdownString = `Items: ${tx.itemsCount}`;
         } else {
@@ -1147,7 +1124,6 @@
     }
 
     function openQrModal(productName, qrCodePath, productId) {
-      const p = window.inventoryCache ? window.inventoryCache.find(x => x.id === productName || x.id === productId || x.id === arguments[0]) : null;
       const id = productName || productId || arguments[0];
       const product = window.inventoryCache ? window.inventoryCache.find(x => x.id === id) : null;
       document.getElementById('modalProductName').textContent = (product && product.name) ? product.name : id;
@@ -1262,7 +1238,6 @@
       }
     }
 
-    // Allow tapping on the overlay background to close the mobile nav
     (function() {
       const _mobOverlay = document.getElementById('mobileNavOverlay');
       if (_mobOverlay) {
