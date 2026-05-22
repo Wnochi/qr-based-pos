@@ -44,6 +44,13 @@
 			<scope>test</scope>
 		</dependency>
 
+		<!-- In-memory fallback for deployments without a MySQL instance -->
+		<dependency>
+			<groupId>com.h2database</groupId>
+			<artifactId>h2</artifactId>
+			<scope>runtime</scope>
+		</dependency>
+
 		<!-- ZXing for QR code generation -->
 		<dependency>
 			<groupId>com.google.zxing</groupId>
