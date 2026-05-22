@@ -281,8 +281,22 @@
 <body>
 
   <div class="navbar">
-    <div class="nav-brand">POS SYSTEM — CASHIER</div>
+    <div style="display:flex; align-items:center; gap:1rem;">
+      <button id="mobileMenuToggle" class="mobile-menu-toggle" aria-label="Open menu" onclick="toggleMobileNav()">☰</button>
+      <div class="nav-brand">POS SYSTEM — CASHIER</div>
+    </div>
     <a href="/index.html" class="nav-exit">Exit Register</a>
+  </div>
+
+  <div id="mobileNavOverlay" class="mobile-nav" aria-hidden="true" role="dialog">
+    <div class="mobile-nav-inner">
+      <button class="mobile-nav-close" onclick="toggleMobileNav()" aria-label="Close menu">✕</button>
+      <nav class="mobile-nav-links">
+        <a href="/index.html" class="nav-link">Home</a>
+        <a href="/admin.html" class="nav-link">Admin</a>
+        <a href="/index.html" class="nav-exit">Exit</a>
+      </nav>
+    </div>
   </div>
 
   <div class="cashier-layout">
@@ -306,7 +320,7 @@
         </div>
 
         <h2 style="font-size: 1.25rem; font-weight: 700; margin-bottom: 0.5rem;">Scanned Items List</h2>
-        <table class="pos-table">
+        <table class="pos-table admin-table">
           <thead>
             <tr>
               <th>Product Description</th>
@@ -478,11 +492,11 @@
       cart.forEach((it, idx) => {
         const tr = document.createElement('tr');
         tr.innerHTML = `
-          <td style="font-weight: 600;">${it.name}</td>
-          <td>${it.quantity}</td>
-          <td>${fmt(it.unitPrice)}</td>
-          <td style="font-weight: 700; color: var(--text);">${fmt(it.unitPrice * it.quantity)}</td>
-          <td></td>
+          <td data-label="Product Description" style="font-weight: 600;">${it.name}</td>
+          <td data-label="Qty">${it.quantity}</td>
+          <td data-label="Unit Price">${fmt(it.unitPrice)}</td>
+          <td data-label="Subtotal" style="font-weight: 700; color: var(--text);">${fmt(it.unitPrice * it.quantity)}</td>
+          <td data-label="Action"></td>
         `;
         
         const remBtn = document.createElement('button');

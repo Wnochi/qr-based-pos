@@ -589,3 +589,79 @@ body {
         height: calc(100vh - 72px);
     }
 }
+/* ==========================================
+   Global: Mobile Navigation & Responsive Table/Form Utilities
+   Applies to admin and cashier pages for mobile friendliness
+   ========================================== */
+.mobile-menu-toggle {
+    display: none;
+    background: transparent;
+    border: none;
+    font-size: 1.45rem;
+    padding: 0.25rem 0.6rem;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+}
+
+.mobile-nav {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.35);
+    z-index: 9998;
+    align-items: flex-start;
+    justify-content: flex-start;
+}
+
+.mobile-nav-inner {
+    background: var(--card-bg);
+    width: 82%;
+    max-width: 360px;
+    height: 100%;
+    padding: 1rem;
+    box-shadow: 2px 0 18px rgba(0,0,0,0.12);
+    overflow-y: auto;
+}
+
+.mobile-nav-close {
+    background: transparent;
+    border: none;
+    font-size: 1.25rem;
+    float: right;
+    cursor: pointer;
+}
+
+.mobile-nav-links { display: flex; flex-direction: column; gap: 0.5rem; margin-top: 1rem; }
+.mobile-nav-links .nav-link { text-align: left; padding: 0.9rem 1rem; font-size: 1.02rem; border-radius: 8px; width: 100%; }
+
+body.nav-open { overflow: hidden; }
+
+@media (max-width: 767px) {
+    .nav-menu { display: none; }
+    .mobile-menu-toggle { display: inline-flex; }
+    .navbar { padding: 0.75rem 1rem; }
+
+    .admin-viewport { padding: 1rem; }
+
+    /* Stack form fields (also handle inline form groups used in cashier) */
+    .form-field-group, .form-group-inline { flex-direction: column; align-items: stretch; }
+    .form-field-group label, .form-group-inline label { width: 100%; margin-bottom: 0.45rem; }
+    .form-input-box { width: 100%; }
+    .form-button-actions-row { flex-direction: column; gap: 0.85rem; }
+    .form-button-actions-row .btn-submit { width: 100%; padding: 0.9rem 1rem; font-size: 1rem; }
+
+    /* Touch targets */
+    .btn-action, .btn-submit { min-height: 44px; padding: 0.6rem 0.9rem; }
+
+    /* Responsive table -> card list */
+    .admin-table { display: block; }
+    .admin-table thead { display: none; }
+    .admin-table tbody { display: grid; gap: 0.85rem; }
+    .admin-table tr { display: block; background: var(--card-bg); border: 1px solid var(--border); padding: 0.85rem; border-radius: var(--radius-md); }
+    .admin-table td { display: flex; justify-content: space-between; padding: 0.45rem 0; border: none; }
+    .admin-table td::before { content: attr(data-label); font-weight: 700; color: #6b7280; margin-right: 0.6rem; flex: 0 0 48%; text-align: left; }
+
+    /* Sales filters stack */
+    .filters-row { display: flex; flex-direction: column; gap: 0.8rem; }
+    .filters-row > div { min-width: auto !important; }
+}

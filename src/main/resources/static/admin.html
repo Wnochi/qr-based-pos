@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width: 100% max width: 1000px, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <title>Admin Dashboard Control Panel</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -361,6 +361,8 @@
       width: 100%;
       max-width: 500px;
     }
+
+    /* Responsive utilities moved to styles.css for global use */
   </style>
 </head>
 <body>
@@ -370,6 +372,7 @@
       <a href="/index.html" style="display: flex; align-items: center; text-decoration: none;">
         <img src="Logo.jpg" alt="Website Logo" style="height: 45px; width: auto; object-fit: contain;">
       </a>
+      <button id="mobileMenuToggle" class="mobile-menu-toggle" aria-label="Open menu" onclick="toggleMobileNav()">☰</button>
       <div class="nav-menu">
         <button id="tab-dashboard" class="nav-link active" onclick="switchMainTab('dashboard')">Dashboard</button>
         <button id="tab-inventory" class="nav-link" onclick="switchMainTab('inventory')">Inventory</button>
@@ -377,6 +380,18 @@
       </div>
     </div>
     <a href="/index.html" class="nav-exit">Exit</a>
+  </div>
+
+  <div id="mobileNavOverlay" class="mobile-nav" aria-hidden="true" role="dialog">
+    <div class="mobile-nav-inner">
+      <button class="mobile-nav-close" onclick="toggleMobileNav()" aria-label="Close menu">✕</button>
+      <nav class="mobile-nav-links">
+        <button onclick="toggleMobileNav(); switchMainTab('dashboard')" class="nav-link">Dashboard</button>
+        <button onclick="toggleMobileNav(); switchMainTab('inventory')" class="nav-link">Inventory</button>
+        <button onclick="toggleMobileNav(); switchMainTab('sales')" class="nav-link">Sales Report</button>
+        <a href="/index.html" class="nav-exit">Exit</a>
+      </nav>
+    </div>
   </div>
 
   <div class="admin-viewport">
@@ -503,7 +518,7 @@
         <p style="color: #6b7280; font-size: 0.9rem; margin-top: 0.2rem;">Real-time overview of revenue distribution trajectories.</p>
       </div>
 
-      <div style="background-color: var(--card-bg); border: 1px solid var(--border); padding: 1rem; border-radius: 12px; display: flex; flex-wrap: wrap; gap: 1rem; align-items: center; margin-bottom: 1.5rem; box-shadow: 0 1px 3px rgba(0,0,0,0.02);">
+      <div class="filters-row" style="background-color: var(--card-bg); border: 1px solid var(--border); padding: 1rem; border-radius: 12px; display: flex; flex-wrap: wrap; gap: 1rem; align-items: center; margin-bottom: 1.5rem; box-shadow: 0 1px 3px rgba(0,0,0,0.02);">
         <div style="flex: 1; min-width: 180px;">
           <label style="display: block; font-size: 0.8rem; font-weight: 600; color: #6b7280; margin-bottom: 0.3rem;">Search ID</label>
           <input type="text" id="salesSearchInput" placeholder="Enter ID..." oninput="filterSalesTable()" style="width: 100%; padding: 0.55rem; border: 1px solid #d1d5db; border-radius: 6px; font-size: 0.9rem;">
@@ -727,11 +742,11 @@
                 const itemSubtotal = parseFloat(item.unitPrice || 0) * parseInt(item.quantity || 0, 10);
                 
                 tr.innerHTML = `
-                  <td style="font-weight:600;">#${tx.id.substring(0, 8)}...</td>
-                  <td>${item.name}</td>
-                  <td>${timeStr}</td>
-                  <td>${item.quantity}</td>
-                  <td style="font-weight:700; color:var(--dark-pink);">₱${itemSubtotal.toFixed(2)}</td>
+                  <td data-label="Transaction No." style="font-weight:600;">#${tx.id.substring(0, 8)}...</td>
+                  <td data-label="Product Name">${item.name}</td>
+                  <td data-label="Time">${timeStr}</td>
+                  <td data-label="Quantity">${item.quantity}</td>
+                  <td data-label="Amount" style="font-weight:700; color:var(--dark-pink);">₱${itemSubtotal.toFixed(2)}</td>
                 `;
                 activityTable.appendChild(tr);
                 rowsCount++;
@@ -752,8 +767,8 @@
         
         data.forEach(p => {
           const tr = document.createElement('tr');
-          const currentStock = parseInt(p.stock || 0, 10);
-          const threshold = parseInt(p.threshold || p.lowStockThreshold || 5, 10);
+          const currentStock = Number.parseInt(p.stock || 0, 10);
+          const threshold = Number.parseInt(p.threshold || p.lowStockThreshold || 5, 10);
           let barColor = 'var(--status-green)';
           
           if (currentStock <= 0) {
@@ -766,16 +781,16 @@
           const imgTag = imgSrc ? `<img class="table-img-placeholder" src="${imgSrc}">` : `<div class="table-img-placeholder"></div>`;
 
           tr.innerHTML = `
-            <td>${imgTag}</td>
-            <td style="font-weight:600;">${p.name}</td>
-            <td>₱${parseFloat(p.price || 0).toFixed(2)}</td>
-            <td>${currentStock}</td>
-            <td>
+            <td data-label="Photo">${imgTag}</td>
+            <td data-label="Product Name" style="font-weight:600;">${p.name}</td>
+            <td data-label="Price">₱${parseFloat(p.price || 0).toFixed(2)}</td>
+            <td data-label="Stock">${currentStock}</td>
+            <td data-label="Status">
               <div class="status-bar-container">
                 <div class="status-bar-fill" style="width: 100%; background-color: ${barColor};"></div>
               </div>
             </td>
-            <td>
+            <td data-label="Actions">
               <div style="display: flex; gap: 0.5rem;">
                 <button class="btn-action" style="padding: 0.25rem 0.6rem; font-size: 0.85rem;" onclick="openQrModal('${p.id || ''}')">QR Code</button>
                 <button class="btn-action" style="padding: 0.25rem 0.6rem; font-size: 0.85rem;" onclick="editProductEntry('${p.id}')">Edit</button>
@@ -911,15 +926,15 @@
         if (rawMethod === 'MAYA') methodBadgeStyle = "background:#f0fdf4; color:#166534; font-weight:600;";
 
         tr.innerHTML = `
-          <td style="padding: 1rem 1.25rem; font-weight: 600; font-family: monospace; color:#4b5563;">#${tx.id.substring(0,8)}...</td>
-          <td style="padding: 1rem 1.25rem; color: #4b5563;">${dateStr}</td>
-          <td style="padding: 1rem 1.25rem; color: #374151;" title="${itemBreakdownString.replace(/<[^>]*>/g, '')}">
+          <td data-label="Transaction ID" style="padding: 1rem 1.25rem; font-weight: 600; font-family: monospace; color:#4b5563;">#${tx.id.substring(0,8)}...</td>
+          <td data-label="Timestamp Date" style="padding: 1rem 1.25rem; color: #4b5563;">${dateStr}</td>
+          <td data-label="Items Breakdown" style="padding: 1rem 1.25rem; color: #374151;" title="${itemBreakdownString.replace(/<[^>]*>/g, '')}">
             ${itemBreakdownString}
           </td>
-          <td style="padding: 1rem 1.25rem;">
+          <td data-label="Method" style="padding: 1rem 1.25rem;">
             <span style="padding: 0.25rem 0.6rem; border-radius: 6px; font-size: 0.8rem; ${methodBadgeStyle}">${rawMethod}</span>
           </td>
-          <td style="padding: 1rem 1.25rem; text-align: right; font-weight: 700; color: var(--dark-pink);">
+          <td data-label="Total Gross" style="padding: 1rem 1.25rem; text-align: right; font-weight: 700; color: var(--dark-pink);">
             ₱${txAmount.toFixed(2)}
           </td>
         `;
@@ -1112,6 +1127,31 @@
          }
       }
     }
+
+    function toggleMobileNav() {
+      const overlay = document.getElementById('mobileNavOverlay');
+      if (!overlay) return;
+      const isOpen = overlay.style.display === 'flex';
+      if (isOpen) {
+        overlay.style.display = 'none';
+        overlay.setAttribute('aria-hidden', 'true');
+        document.body.classList.remove('nav-open');
+      } else {
+        overlay.style.display = 'flex';
+        overlay.setAttribute('aria-hidden', 'false');
+        document.body.classList.add('nav-open');
+      }
+    }
+
+    // Allow tapping on the overlay background to close the mobile nav
+    (function() {
+      const _mobOverlay = document.getElementById('mobileNavOverlay');
+      if (_mobOverlay) {
+        _mobOverlay.addEventListener('click', function(e) {
+          if (e.target === _mobOverlay) toggleMobileNav();
+        });
+      }
+    })();
 
     loadDashboardMetrics();
   </script>
