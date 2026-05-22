@@ -7,4 +7,6 @@ app.use(express.json());
 const productRoutes = require("./routes/product");
 app.use("/products", productRoutes);
 
-app.listen(3000, () => console.log("Server running on port 3000"));
+// Use the port provided by the environment (Render sets PORT)
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
