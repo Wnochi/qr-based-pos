@@ -84,31 +84,3 @@ document.getElementById('cashReceived').addEventListener('keydown', function(e) 
         e.preventDefault();
     }
 });
-
-// Global mobile nav toggle helper used by admin and cashier pages
-window.toggleMobileNav = function() {
-  try {
-    const overlay = document.getElementById('mobileNavOverlay');
-    if (!overlay) return;
-    const isOpen = overlay.style.display === 'flex';
-    if (isOpen) {
-      overlay.style.display = 'none';
-      overlay.setAttribute('aria-hidden', 'true');
-      document.body.classList.remove('nav-open');
-    } else {
-      overlay.style.display = 'flex';
-      overlay.setAttribute('aria-hidden', 'false');
-      document.body.classList.add('nav-open');
-    }
-  } catch (e) { console.warn('toggleMobileNav failed', e); }
-};
-
-// Close mobile nav when the overlay background is clicked
-document.addEventListener('click', function(e) {
-  try {
-    const overlay = document.getElementById('mobileNavOverlay');
-    if (!overlay) return;
-    if (overlay.style.display !== 'flex') return;
-    if (e.target === overlay) toggleMobileNav();
-  } catch (err) { /* noop */ }
-});
