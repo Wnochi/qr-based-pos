@@ -51,6 +51,12 @@
 			<scope>runtime</scope>
 		</dependency>
 
+		<dependency>
+    		<groupId>com.mysql</groupId>
+    		<artifactId>mysql-connector-j</artifactId>
+    <scope>runtime</scope>
+		</dependency>
+
 		<!-- ZXing for QR code generation -->
 		<dependency>
 			<groupId>com.google.zxing</groupId>
