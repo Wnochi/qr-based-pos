@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
 import com.google.zxing.WriterException;
-
+//
 @ControllerAdvice
 public class RestExceptionHandler {
 
