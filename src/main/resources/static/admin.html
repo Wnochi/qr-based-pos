@@ -405,13 +405,60 @@
     .mobile-nav-links .nav-link { text-align: left; padding: 0.9rem 1rem; font-size: 1.02rem; border-radius: 8px; width: 100%; }
     body.nav-open { overflow: hidden; }
 
-    /* Responsive tables become stacked cards on small screens. Rows must use data-label attributes. */
-    @media (max-width: 767px) {
+    /* Responsive: Mobile Navigation, Tables, and Form Optimizations */
+    .mobile-menu-toggle {
+      display: none;
+      background: transparent;
+      border: none;
+      font-size: 1.45rem;
+      padding: 0.25rem 0.6rem;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+    }
+
+    .mobile-nav {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.35);
+      z-index: 9998;
+      align-items: flex-start;
+      justify-content: flex-start;
+    }
+
+    .mobile-nav-inner {
+      background: var(--card-bg);
+      width: 82%;
+      max-width: 360px;
+      height: 100%;
+      padding: 1rem;
+      box-shadow: 2px 0 18px rgba(0,0,0,0.12);
+      overflow-y: auto;
+    }
+
+    .mobile-nav-close {
+      background: transparent;
+      border: none;
+      font-size: 1.25rem;
+      float: right;
+      cursor: pointer;
+    }
+
+    .mobile-nav-links { display: flex; flex-direction: column; gap: 0.5rem; margin-top: 1rem; }
+    .mobile-nav-links .nav-link { text-align: left; padding: 0.9rem 1rem; font-size: 1.02rem; border-radius: 8px; width: 100%; }
+    body.nav-open { overflow: hidden; }
+
+    /* Fixes high-resolution portrait views on flagship phones */
+    @media (max-width: 1199px) or (orientation: portrait) {
       .nav-menu { display: none; }
       .mobile-menu-toggle { display: inline-flex; }
       .navbar { padding: 0.75rem 1rem; }
 
       .admin-viewport { padding: 1rem; }
+
+      /* Force dashboard panels and metrics to stack vertically instead of side-by-side columns */
+      .dashboard-grid { grid-template-columns: 1fr; gap: 1.5rem; }
+      .metrics-row { grid-template-columns: 1fr; gap: 1rem; }
 
       /* Stack form fields */
       .form-field-group { flex-direction: column; align-items: stretch; }
