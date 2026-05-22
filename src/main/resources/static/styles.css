@@ -81,9 +81,6 @@ body {
     color: var(--text);
 }
 
-/* ==========================================
-   2. FLUID RESPONSIVE CONTAINERS
-   ========================================== */
 @media (min-width: 1024px) {
     .cashier-layout {
         grid-template-columns: 1.2fr 0.8fr;
@@ -119,9 +116,6 @@ body {
     }
 }
 
-/* ==========================================
-   3. STANDARDIZED TABLES & METRICS 
-   ========================================== */
 .panel-card {
     background: var(--card-bg);
     border: 1px solid var(--border);
@@ -157,7 +151,6 @@ body {
     font-variant-numeric: tabular-nums;
 }
 
-/* Form layouts */
 .form-group-inline {
     display: flex;
     justify-content: space-between;
@@ -188,9 +181,6 @@ body {
     cursor: not-allowed;
 }
 
-/* ==========================================
-   4. CALCULATOR NUMPAD CONFIGURATION
-   ========================================== */
 .numpad-container {
     width: 100%;
     margin-top: 10px; 
@@ -210,13 +200,13 @@ body {
     align-items: center;
     background: #FFFFFF;
     border: 1px solid var(--border);
-    padding: 0; 
+    padding: 0;
     font-size: 1.35rem;
     font-weight: 600;
     color: var(--text);
     border-radius: var(--radius-md);
     cursor: pointer;
-    aspect-ratio: 1.5 / 1; /* FIXED: Consolidated layout format */
+    aspect-ratio: 1.5 / 1;
     transition: all 0.15s ease;
 }
 
@@ -251,9 +241,6 @@ body {
     color: white;
 }
 
-/* ==========================================
-   5. OVERLAYS, STATUSES & RECEIPTS
-   ========================================== */
 .status-indicator {
     display: inline-block;
     height: 8px;
@@ -344,9 +331,6 @@ body {
     color: var(--text);
 }
 
-/* ==========================================
-   1. MASTER TOP NAVIGATION FRAME
-   ========================================== */
 .navbar {
     display: flex;
     align-items: center;
@@ -382,9 +366,6 @@ body {
     color: var(--text);
 }
 
-/* ==========================================
-   2. FLUID RESPONSIVE CONTAINERS
-   ========================================== */
 .cashier-layout {
     display: grid;
     grid-template-columns: 1fr;
@@ -414,8 +395,7 @@ body {
     border: 1px solid var(--border);
     border-radius: var(--radius-lg);
     height: auto; 
-} /* FIXED: Closed missing bracket here */
-
+}
 @media (min-width: 1024px) {
     .checkout-pane {
         max-height: 100%; 
@@ -423,9 +403,6 @@ body {
     }
 }
 
-/* ==========================================
-   3. STANDARDIZED TABLES & METRICS 
-   ========================================== */
 .panel-card {
     background: var(--card-bg);
     border: 1px solid var(--border);
@@ -461,7 +438,6 @@ body {
     font-variant-numeric: tabular-nums;
 }
 
-/* Form layouts */
 .form-group-inline {
     display: flex;
     justify-content: space-between;
@@ -492,9 +468,6 @@ body {
     cursor: not-allowed;
 }
 
-/* ==========================================
-   4. CALCULATOR NUMPAD CONFIGURATION
-   ========================================== */
 .numpad-container {
     width: 100%;
     margin-top: 10px; 
@@ -520,7 +493,7 @@ body {
     color: var(--text);
     border-radius: var(--radius-md);
     cursor: pointer;
-    aspect-ratio: 1.5 / 1; /* FIXED: Consolidated layout format */
+    aspect-ratio: 1.5 / 1;
     transition: all 0.15s ease;
 }
 
@@ -550,14 +523,11 @@ body {
     transition: background 0.2s;
 }
 
-.complete-btn:hover, .btn-primary:hover { 
-    background-color: var(--dark-pink); 
+.complete-btn:hover, .btn-primary:hover {
+    background-color: var(--dark-pink);
     color: white;
 }
 
-/* ==========================================
-   5. OVERLAYS, STATUSES & RECEIPTS
-   ========================================== */
 .status-indicator {
     display: inline-block;
     height: 8px;
@@ -602,5 +572,20 @@ body {
         background: #ffffff !important;
         color: #111111 !important;
         -webkit-print-color-adjust: exact;
+    }
+}
+
+.admin-layout {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 24px;
+    padding: 24px;
+    height: auto;
+}
+
+@media (min-width: 1024px) {
+    .cashier-layout {
+        grid-template-columns: 1.3fr 0.7fr;
+        height: calc(100vh - 72px);
     }
 }
