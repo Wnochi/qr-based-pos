@@ -669,3 +669,21 @@ body{
   letter-spacing: .07em !important;
   border: none !important;
 }
+
+.btn-login {
+  width: 100%;
+  padding: 12px;
+  background-color: #c74ba2; /* Tailor this color code to match your Minilikha theme */
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-family: 'Poppins', sans-serif;
+  font-weight: 600;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.btn-login:hover {
+  background-color: #3f51b5;
+}
