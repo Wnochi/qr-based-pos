@@ -104,26 +104,30 @@ body{
   color: #4a3a63;
 }
 
-/* Restore original signup button for login/register (global) */
-.signup-btn {
-  width: 100%;
-  padding: 15px;
-  border-radius: 50px;
-  border: none;
-  background: #4a4a6a;
-  color: white;
-  font-size: 1.1rem;
+#loginForm .signup-btn {
+  background: linear-gradient(135deg, #7b47c8, #9b6ce6); 
+  color: #ffffff;
+  border-radius: 50px; 
+  padding: 14px;
+  font-family: 'Poppins', sans-serif;
   font-weight: 600;
-  cursor: pointer;
-  margin-top: 20px;
-  transition: 0.3s;
-}
-.signup-btn:hover {
-  background: #353555;
-  transform: scale(1.02);
+  font-size: 1.05rem;
+  letter-spacing: 0.5px;
+  margin-top: 30px;
+  box-shadow: 0 6px 20px rgba(123, 71, 200, 0.25);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease;
 }
 
-/* POS-scoped overrides (keep polish for .app only) */
+#loginForm .signup-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px rgba(123, 71, 200, 0.35);
+  opacity: 0.95;
+}
+
+#loginForm .signup-btn:active {
+  transform: translateY(0);
+}
+
 .app .input-field{ margin-bottom:14px; }
 .app .input-field label{ display:block; font-size:0.9rem; color:rgba(0,0,0,0.6); margin-bottom:6px; }
 .app .input-field input, .app .input-field select, .app .input-field textarea{
@@ -199,7 +203,6 @@ body{
 .sidebar.collapsed .badge{ display:none; }
 
 @media (max-width:700px){
-  /* don't collapse into tiny header on small screens */
   .sidebar.collapsed{ width:100%; }
   .sidebar.collapsed .brand-sm{ display:block; }
 }
@@ -207,12 +210,6 @@ body{
 /* Modal styles */
 .modal{ position:fixed; inset:0; display:none; align-items:center; justify-content:center; background:rgba(0,0,0,0.45); z-index:1200; }
 .modal .modal-content{ background:#fff; padding:16px; border-radius:10px; min-width:280px; box-shadow:var(--shadow); color:#111; }
-
-
-/* ============================================================
-   APPEND TO THE BOTTOM OF style.css
-   ============================================================ */
-
 
 /* ── Cart panel layout ──────────────────────────────────────── */
 #panelCart .panel-inner {
@@ -222,7 +219,6 @@ body{
   align-items: start;
 }
 
-/* Cart items list */
 .cart-items-box {
   background: #fff;
   border: 1px solid rgba(0,0,0,0.06);
@@ -239,7 +235,6 @@ body{
   margin-bottom: 12px;
 }
 
-/* Override old .cart-item */
 .cart-item {
   display: flex;
   align-items: center;
@@ -272,7 +267,6 @@ body{
 }
 .cart-item-unit { font-size: 12px; color: rgba(0,0,0,0.45); margin-top: 2px; }
 
-/* Qty pill controls */
 .qty-ctrl {
   display: flex;
   align-items: center;
@@ -326,7 +320,6 @@ body{
 }
 .cart-remove:hover { color: #ff6b6b; }
 
-/* Checkout summary box */
 .checkout-box {
   background: #fff;
   border: 1px solid rgba(0,0,0,0.06);
@@ -359,7 +352,6 @@ body{
   text-transform: uppercase;
   color: rgba(0,0,0,0.4);
 }
-/* Override global input style for cash input */
 #cashInput {
   width: 100%;
   border: 1px solid rgba(0,0,0,0.1) !important;
@@ -372,7 +364,6 @@ body{
 }
 #cashInput:focus { border-color: var(--accent) !important; }
 
-/* Change display row */
 #changeRow {
   display: none;
   justify-content: space-between;
@@ -384,7 +375,6 @@ body{
 .change-label { font-size: 12px; color: #27ae60; font-weight: 600; }
 #changeOut { font-size: 14px; font-weight: 700; color: #27ae60; }
 
-/* Checkout button */
 #checkoutBtn {
   width: 100%;
   padding: 12px;
@@ -401,31 +391,11 @@ body{
 #checkoutBtn:hover { opacity: .88; transform: translateY(-1px); }
 #checkoutBtn:disabled { opacity: .4; cursor: not-allowed; transform: none; }
 
-
 /* ── Admin panel ────────────────────────────────────────────── */
-
-/* Login / Auth: logo placement */
-.logo-wrap{
-  position: absolute;
-  top: 24px;
-  left: 24px;
-  z-index: 60;
-}
-.site-logo{
-  width: 72px;
-  height: 72px;
-  border-radius: 50%;
-  object-fit: cover;
-  background: #fff;
-  padding: 6px;
-  box-shadow: var(--shadow);
-  display: block;
-}
 @media (max-width: 800px){
-  .logo-wrap{ left: 50%; transform: translateX(-50%); top: 12px; }
   .main-card{ margin-top: 48px; }
 }
-.admin-prod-row { /* grid items */
+.admin-prod-row {
   display: flex;
   flex-direction: column;
   align-items: stretch;
@@ -437,7 +407,6 @@ body{
 }
 .admin-prod-row:last-child { border-bottom: none; }
 
-/* make the admin products container a responsive grid (4-5 items across on wide screens) */
 #adminProducts {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
@@ -464,7 +433,6 @@ body{
 
 .admin-row-actions { display: flex; gap: 6px; justify-content: center; }
 
-/* Stock badges */
 .stock-badge {
   font-size: 11px;
   font-weight: 600;
@@ -477,8 +445,6 @@ body{
 .stock-low { background: rgba(243,156,18,0.12);  color: #b7770d; }
 .stock-out { background: rgba(255,107,107,0.12); color: #c0392b; }
 
-/* Admin row action buttons */
-.admin-row-actions { display: flex; gap: 6px; }
 .act-btn {
   border: 1px solid rgba(0,0,0,0.08);
   background: #fff;
@@ -491,7 +457,6 @@ body{
 }
 .act-btn:hover { background: #f5f0ff; color: var(--accent); border-color: var(--accent); }
 .act-btn.danger:hover { background: rgba(255,107,107,0.1); color: #c0392b; border-color: #ff6b6b; }
-
 
 /* ── Sales cards ────────────────────────────────────────────── */
 .sale-card {
@@ -520,12 +485,8 @@ body{
   color: rgba(0,0,0,0.6);
 }
 
-
-/* ── Responsive: stack cart columns on small screens ────────── */
 @media (max-width: 700px) {
-  #panelCart .panel-inner {
-    grid-template-columns: 1fr;
-  }
+  #panelCart .panel-inner { grid-template-columns: 1fr; }
 }
 
 /* Admin form card */
@@ -575,7 +536,6 @@ body{
   background: #fafafa;
   outline: none;
 }
-
 .admin-form-grid .form-field input:focus {
   border-color: #9b6ce6;
   background: #fff;
@@ -641,7 +601,6 @@ body{
   .admin-form-grid .form-field:first-child { grid-column: 1 / -1; }
 }
 
-/* Force admin form inputs to use card style, not global underline style */
 #panelAdmin .admin-form-card input[type="text"],
 #panelAdmin .admin-form-card input[type="number"],
 #panelAdmin .admin-form-card input:not([type="file"]) {
@@ -670,20 +629,30 @@ body{
   border: none !important;
 }
 
+/* Updated login button theme layout alignment */
 .btn-login {
   width: 100%;
-  padding: 12px;
-  background-color: #c74ba2; /* Tailor this color code to match your Minilikha theme */
-  color: white;
+  padding: 14px;
+  background: linear-gradient(135deg, #7b47c8, #9b6ce6); 
+  color: #ffffff;
   border: none;
-  border-radius: 6px;
+  border-radius: 50px; 
   font-family: 'Poppins', sans-serif;
   font-weight: 600;
-  font-size: 1rem;
+  font-size: 1.05rem;
+  letter-spacing: 0.5px;
+  margin-top: 30px;
   cursor: pointer;
-  transition: background-color 0.2s ease;
+  box-shadow: 0 6px 20px rgba(123, 71, 200, 0.25);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease;
 }
 
 .btn-login:hover {
-  background-color: #3f51b5;
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px rgba(123, 71, 200, 0.35);
+  opacity: 0.95;
+}
+
+.btn-login:active {
+  transform: translateY(0);
 }
