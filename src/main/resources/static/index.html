@@ -2,102 +2,69 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>POS System Portal</title>
-  <style>
-    :root {
-      --primary: #2563eb;
-      --primary-dark: #1d4ed8;
-      --bg-main: #f8fafc;
-      --card-bg: #ffffff;
-      --text: #1e293b;
-      --border: #e2e8f0;
-    }
-
-    * { 
-      box-sizing: border-box; 
-      margin: 0; 
-      padding: 0; 
-      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; 
-    }
-
-    body { 
-      background-color: var(--bg-main); 
-      color: var(--text);
-    }
-
-    .portal-container {
-      height: 100vh;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      gap: 2rem;
-      padding: 1rem;
-    }
-
-    .portal-container h1 {
-      font-size: 2.5rem; 
-      font-weight: 800;
-      letter-spacing: -0.025em;
-      text-align: center;
-      color: #0f172a;
-    }
-
-    .portal-card-box {
-      display: flex;
-      gap: 2rem;
-      width: 100%;
-      max-width: 700px;
-      justify-content: center;
-    }
-
-    .portal-btn {
-      background: var(--card-bg);
-      border: 2px solid var(--border);
-      padding: 3rem 2rem;
-      border-radius: 1rem;
-      text-decoration: none;
-      color: var(--text);
-      font-size: 1.35rem;
-      font-weight: 700;
-      text-align: center;
-      flex: 1;
-      box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05), 0 2px 4px -1px rgba(0,0,0,0.03);
-      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-    }
-
-    .portal-btn .icon {
-      font-size: 3rem;
-      margin-bottom: 1rem;
-      display: block;
-    }
-
-    .portal-btn:hover {
-      transform: translateY(-4px);
-      border-color: var(--primary);
-      color: var(--primary);
-      box-shadow: 0 10px 15px -3px rgba(37, 99, 235, 0.1), 0 4px 6px -2px rgba(37, 99, 235, 0.05);
-    }
-  </style>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Login - Crochet POS</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-
-  <div class="portal-container">
-    <h1>POS SYSTEM</h1>
-    
-    <div class="portal-card-box">
-      <a href="/cashier.html" class="portal-btn">
-        <span class="icon"></span>
-        <div>CASHIER</div>
-      </a>
-      
-      <a href="/admin.html" class="portal-btn">
-        <span class="icon"></span>
-        <div>ADMIN</div>
-      </a>
-    </div>
+  <div class="logo-wrap">
+    <img src="Logo.jpg" alt="Minilikha logo" class="site-logo">
   </div>
+  <main class="main-card">
+    <section class="form-side">
+      <h1>Welcome Back</h1>
+      <form id="loginForm">
+        <div class="input-field">
+          <label for="email">Email</label>
+          <input type="email" id="email" required placeholder="you@example.com">
+        </div>
 
+        <div class="input-field">
+          <label for="password">Password</label>
+          <input type="password" id="password" required placeholder="Password">
+        </div>
+
+        <button type="submit" class="signup-btn">Login</button>
+        <div id="loginError" class="error" style="color: var(--danger); font-size: 0.85rem; margin-top: 10px; text-align: center; font-weight: 600;"></div>
+        <div class="footer-text">Don't have an account? <a href="register.html">Register</a></div>
+      </form>
+    </section>
+
+    <aside class="image-side">
+      <div class="image-container">
+        <img src="https://www.thesprucecrafts.com/thmb/3loI7nKT4t7-9JDqDME2Kur4tkw=/2507x3760/filters:fill(auto,1)/beautiful-beaded-crochet-project-622205580-5b01d9a0ae9ab80036a2faf7.jpg" alt="Decorative">
+      </div>
+    </aside>
+  </main>
+
+  <script src="auth.js"></script>
+  <script>
+    document.getElementById('loginForm').addEventListener('submit', function(e){
+      e.preventDefault();
+      const email = document.getElementById('email').value.trim();
+      const password = document.getElementById('password').value;
+      const errEl = document.getElementById('loginError');
+      errEl.textContent = '';
+      
+      // Run the verification function from auth.js
+      const res = loginUser(email, password);
+      
+      if(res.success){
+        // Check the role returned by auth.js and redirect accordingly
+        if (res.role === 'admin') {
+          window.location.href = 'admin.html';
+        } else if (res.role === 'cashier') {
+          window.location.href = 'cashier.html';
+        } else {
+          // Fallback just in case
+          window.location.href = 'index.html';
+        }
+      } else {
+        // Show the error message on screen
+        errEl.textContent = res.message;
+      }
+    });
+  </script>
 </body>
 </html>
