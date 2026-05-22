@@ -584,7 +584,7 @@ body {
 }
 
 @media (min-width: 1024px) {
-    .cashier-layout {
+    .admin-layout {
         grid-template-columns: 1.3fr 0.7fr;
         height: calc(100vh - 72px);
     }
