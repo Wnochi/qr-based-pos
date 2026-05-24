@@ -8,21 +8,21 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <main class="main-card">
+  <main class="main-card" aria-labelledby="loginTitle">
     <section class="form-side">
-      <h1>Welcome Back</h1>
+      <h1 id="loginTitle">Welcome Back</h1>
       
       <form id="loginForm">
         <div class="input-field">
           <label for="email">Email</label>
-          <input type="email" id="email" required placeholder="@gmail.com">
+          <input type="email" id="email" required placeholder="@gmail.com" autocomplete="email">
         </div>
 
         <div class="input-field">
           <label for="password">Password</label>
-          <input type="password" id="password" required placeholder="Password">
+          <input type="password" id="password" required placeholder="Password" autocomplete="current-password">
         </div>
-        <div id="loginError" style="color: red; margin-bottom: 15px; font-size: 0.9rem;"></div>
+        <div id="loginError" aria-live="polite"></div>
         <button type="submit" class="btn-login">Login</button>
       </form>
 
@@ -30,7 +30,7 @@
 
     <aside class="image-side">
       <div class="image-container">
-        <img src="https://www.thesprucecrafts.com/thmb/3loI7nKT4t7-9JDqDME2Kur4tkw=/2507x3760/filters:fill(auto,1)/beautiful-beaded-crochet-project-622205580-5b01d9a0ae9ab80036a2faf7.jpg" alt="Decorative">
+        <img src="https://www.thesprucecrafts.com/thmb/3loI7nKT4t7-9JDqDME2Kur4tkw=/2507x3760/filters:fill(auto,1)/beautiful-beaded-crochet-project-622205580-5b01d9a0ae9ab80036a2faf7.jpg" alt="Crochet craft display">
       </div>
     </aside>
   </main>
