@@ -778,21 +778,23 @@
             <option value="2025">2025</option>
           </select>
         </div>
-        <div style="min-width: 140px;">
-          <label style="display: block; font-size: 0.8rem; font-weight: 600; color: #6b7280; margin-bottom: 0.3rem;">Payment Method</label>
-          <select id="salesPaymentFilter" onchange="filterSalesTable()" style="width: 100%; padding: 0.55rem; border: 1px solid #d1d5db; border-radius: 6px; font-size: 0.9rem; background: white;">
-            <option value="ALL">All Methods</option>
-            <option value="CASH">Cash</option>
-            <option value="GCASH">Card</option>
+        <div style="min-width: 160px;">
+          <label style="display: block; font-size: 0.8rem; font-weight: 600; color: #6b7280; margin-bottom: 0.3rem;">Filter Month</label>
+          <select id="salesMonthFilter" onchange="filterSalesTable()" style="width: 100%; padding: 0.55rem; border: 1px solid #d1d5db; border-radius: 6px; font-size: 0.9rem; background: white; font-weight: 600;">
+            <option value="ALL">All Months</option>
+            <option value="1">January</option>
+            <option value="2">February</option>
+            <option value="3">March</option>
+            <option value="4">April</option>
+            <option value="5">May</option>
+            <option value="6">June</option>
+            <option value="7">July</option>
+            <option value="8">August</option>
+            <option value="9">September</option>
+            <option value="10">October</option>
+            <option value="11">November</option>
+            <option value="12">December</option>
           </select>
-        </div>
-        <div style="min-width: 140px;">
-          <label style="display: block; font-size: 0.8rem; font-weight: 600; color: #6b7280; margin-bottom: 0.3rem;">From Date</label>
-          <input type="date" id="salesDateFrom" onchange="filterSalesTable()" style="width: 100%; padding: 0.5rem; border: 1px solid #d1d5db; border-radius: 6px; font-size: 0.9rem;">
-        </div>
-        <div style="min-width: 140px;">
-          <label style="display: block; font-size: 0.8rem; font-weight: 600; color: #6b7280; margin-bottom: 0.3rem;">To Date</label>
-          <input type="date" id="salesDateTo" onchange="filterSalesTable()" style="width: 100%; padding: 0.5rem; border: 1px solid #d1d5db; border-radius: 6px; font-size: 0.9rem;">
         </div>
         <div style="align-self: flex-end;">
           <button onclick="clearSalesFilters()" style="background: #f3f4f6; color: #4b5563; border: 1px solid #e5e7eb; padding: 0.55rem 1rem; border-radius: 6px; font-weight: 600; cursor: pointer; font-size: 0.9rem;">Reset</button>
@@ -832,13 +834,12 @@
               <th>Transaction ID</th>
               <th>Timestamp Date</th>
               <th>Items Breakdown</th>
-              <th>Method</th>
               <th style="text-align: right;">Total Gross</th>
             </tr>
           </thead>
           <tbody id="salesTableBody">
             <tr>
-              <td colspan="5" style="text-align: center; padding: 2rem; color: #9ca3af;">Loading log data...</td>
+              <td colspan="4" style="text-align: center; padding: 2rem; color: #9ca3af;">Loading log data...</td>
             </tr>
           </tbody>
         </table>
@@ -1109,7 +1110,7 @@
       } catch (e) {
         console.error("Report breakdown sync failure: ", e);
         document.getElementById('salesTableBody').innerHTML = `
-          <tr><td colspan="5" style="text-align:center; color:var(--status-red); padding:2rem; font-weight:600;"> Error fetching database records.</td></tr>`;
+          <tr><td colspan="4" style="text-align:center; color:var(--status-red); padding:2rem; font-weight:600;"> Error fetching database records.</td></tr>`;
       }
     }
 
@@ -1123,7 +1124,7 @@
       const todayString = new Date().toDateString();
 
       if (recordsList.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; padding: 2.5rem; color: #9ca3af;">No transaction statements match current filter selections.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="4" style="text-align: center; padding: 2.5rem; color: #9ca3af;">No transaction statements match current filter selections.</td></tr>`;
         document.getElementById('reportDailySales').textContent = "₱0.00";
         document.getElementById('reportTotalRevenue').textContent = "₱0.00";
         document.getElementById('reportTotalTransactions').textContent = "0";
@@ -1164,20 +1165,12 @@
         const tr = document.createElement('tr');
         tr.style.borderBottom = "1px solid var(--border)";
         const dateStr = tx.createdAt ? new Date(tx.createdAt).toLocaleString('en-US') : 'N/A';
-        const rawMethod = tx.paymentMethod ? tx.paymentMethod.toUpperCase() : 'CASH';
-        
-        let methodBadgeStyle = "background:#f3f4f6; color:#4b5563;";
-        if (rawMethod === 'GCASH') methodBadgeStyle = "background:#e0f2fe; color:#0369a1; font-weight:600;";
-        if (rawMethod === 'MAYA') methodBadgeStyle = "background:#f0fdf4; color:#166534; font-weight:600;";
 
         tr.innerHTML = `
           <td data-label="Transaction ID" style="padding: 1rem 1.25rem; font-weight: 600; font-family: monospace; color:#4b5563;">#${tx.id.substring(0,8)}...</td>
           <td data-label="Timestamp Date" style="padding: 1rem 1.25rem; color: #4b5563;">${dateStr}</td>
           <td data-label="Items Breakdown" style="padding: 1rem 1.25rem; color: #374151;" title="${itemBreakdownString.replace(/<[^>]*>/g, '')}">
             ${itemBreakdownString}
-          </td>
-          <td data-label="Method" style="padding: 1rem 1.25rem;">
-            <span style="padding: 0.25rem 0.6rem; border-radius: 6px; font-size: 0.8rem; ${methodBadgeStyle}">${rawMethod}</span>
           </td>
           <td data-label="Total Gross" style="padding: 1rem 1.25rem; text-align: right; font-weight: 700; color: var(--dark-pink);">
             ₱${txAmount.toFixed(2)}
@@ -1240,22 +1233,15 @@
     function filterSalesTable() {
       const searchVal = document.getElementById('salesSearchInput').value.toLowerCase().trim();
       const yearVal = document.getElementById('salesYearFilter').value;
-      const methodVal = document.getElementById('salesPaymentFilter').value;
-      const dateFromVal = document.getElementById('salesDateFrom').value;
-      const dateToVal = document.getElementById('salesDateTo').value;
+      const monthVal = document.getElementById('salesMonthFilter').value;
 
       const filtered = globalTransactionsCache.filter(tx => {
         if (!tx.createdAt) return false;
         const txDate = new Date(tx.createdAt);
 
         if (txDate.getFullYear().toString() !== yearVal) return false;
+        if (monthVal !== 'ALL' && txDate.getMonth() + 1 !== parseInt(monthVal, 10)) return false;
         if (searchVal && !tx.id.toLowerCase().includes(searchVal)) return false;
-        
-        const txMethod = tx.paymentMethod ? tx.paymentMethod.toUpperCase() : 'CASH';
-        if (methodVal !== 'ALL' && txMethod !== methodVal) return false;
-
-        if (dateFromVal && txDate < new Date(dateFromVal + "T00:00:00")) return false;
-        if (dateToVal && txDate > new Date(dateToVal + "T23:59:59")) return false;
 
         return true;
       });
@@ -1266,9 +1252,7 @@
     function clearSalesFilters() {
       document.getElementById('salesSearchInput').value = '';
       document.getElementById('salesYearFilter').value = '2026';
-      document.getElementById('salesPaymentFilter').value = 'ALL';
-      document.getElementById('salesDateFrom').value = '';
-      document.getElementById('salesDateTo').value = '';
+      document.getElementById('salesMonthFilter').value = 'ALL';
       filterSalesTable();
     }
 
