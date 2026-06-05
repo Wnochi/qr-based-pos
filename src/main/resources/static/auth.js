@@ -3,12 +3,12 @@ function loginUser(email, password) {
 
   const mockUsers = [
     {
-      email: "admin",
+      email: "adminm",
       password: "admin123",
       role: "admin" // Routes to admin.html
     },
     {
-      email: "cashier",
+      email: "cashier@gmail.com",
       password: "cashier123",
       role: "cashier" // Routes to cashier.html
     }
